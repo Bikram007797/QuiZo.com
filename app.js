@@ -837,7 +837,7 @@ function renderReport() {
 `;
   }
 function toggleReview(idx) {
-const element = document.getElementById(review-${idx});
+const element = document.getElementById(`review-${idx}`);
 if (element) {
 element.classList.toggle('expanded');
 }
@@ -954,7 +954,7 @@ return `
         </div>
     </div>
 `;
-  }
+}
 function resetData() {
 if (confirm('Are you sure you want to reset all your progress? This cannot be undone!')) {
 localStorage.removeItem('quizo_state');
@@ -995,7 +995,7 @@ ${STATE.user.theme === 'light' ? '🌙' : '☀️'}
         `).join('')}
     </div>
 `;
-  }
+}
 function removeBookmark(idx) {
 STATE.bookmarks.splice(idx, 1);
 saveState();
