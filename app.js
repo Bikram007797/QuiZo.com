@@ -340,10 +340,8 @@ function renderChallengeSelect() {
                 <div class="card-header">
                     <div>
                         <div class="card-title">🌍 GEOGRAPHY</div>
-                        <p style="font-size: 14px; color: var(--text-secondary); margin-top: 4px;">
-                            Explore the world's physical and human landscapes
-                        </p>
-                    </div>
+                       
+                  </div>
                 </div>
             </div>
             
@@ -351,9 +349,88 @@ function renderChallengeSelect() {
                 <div class="card-header">
                     <div>
                         <div class="card-title">⚖️ POLITY</div>
-                        <p style="font-size: 14px; color: var(--text-secondary); margin-top: 4px;">
-                            Master constitutional law and governance
-                        </p>
+                        
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card subject-card" onclick="navigate('subjects', {type: '${STATE.currentQuiz}', subject: 'POLITY'})">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">🏛️ ANCIENT HISTORY</div>
+                       
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card subject-card" onclick="navigate('subjects', {type: '${STATE.currentQuiz}', subject: 'POLITY'})">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">🏰 MEDIEVAL HISTORY</div>
+                       
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card subject-card" onclick="navigate('subjects', {type: '${STATE.currentQuiz}', subject: 'POLITY'})">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">🗽 MODERN HISTORY</div>
+                       
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card subject-card" onclick="navigate('subjects', {type: '${STATE.currentQuiz}', subject: 'POLITY'})">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">💰 ECONOMICS</div>
+                       
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card subject-card" onclick="navigate('subjects', {type: '${STATE.currentQuiz}', subject: 'POLITY'})">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">🧬 BIOLOGY</div>
+                       
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card subject-card" onclick="navigate('subjects', {type: '${STATE.currentQuiz}', subject: 'POLITY'})">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">⚛️ PHYSICS</div>
+                        
+                    </div>
+                </div>
+            </div>
+           
+            <div class="card subject-card" onclick="navigate('subjects', {type: '${STATE.currentQuiz}', subject: 'POLITY'})">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">⚗️ CHEMISTRY</div>
+                        
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card subject-card" onclick="navigate('subjects', {type: '${STATE.currentQuiz}', subject: 'POLITY'})">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">🌱 ENVIRONMENT</div>
+                        
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card subject-card" onclick="navigate('subjects', {type: '${STATE.currentQuiz}', subject: 'POLITY'})">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">📖 STATIC GK</div>
+                        
                     </div>
                 </div>
             </div>
