@@ -1153,8 +1153,15 @@ async function viewLastAttempt(type, subject, chapterIdx, setIdx) {
     }
 }
 
-async function renderLeaderboard() {
-    const leaderboardData = await fetchLeaderboard('total');
+function renderLeaderboard() {
+    // Start with loading state
+    setTimeout(async () => {
+        const leaderboardData = await fetchLeaderboard('total');
+        const content = document.getElementById('leaderboard-content');
+        if (content) {
+            content.innerHTML = renderLeaderboardList(leaderboardData);
+        }
+    }, 0);
     
     return `
         <div class="header">
@@ -1168,7 +1175,7 @@ async function renderLeaderboard() {
         </div>
         
         <div class="container">
-            <div style="display: flex; gap: 8px; margin: 16px 0;">
+            <div style="display: flex; gap: 8px; margin: 16px 0; flex-wrap: wrap;">
                 <button class="btn btn-secondary" onclick="switchLeaderboard('total')">🏆 All Time</button>
                 <button class="btn btn-secondary" onclick="switchLeaderboard('daily')">📅 Daily</button>
                 <button class="btn btn-secondary" onclick="switchLeaderboard('weekly')">📊 Weekly</button>
@@ -1176,7 +1183,10 @@ async function renderLeaderboard() {
             </div>
             
             <div id="leaderboard-content">
-                ${renderLeaderboardList(leaderboardData)}
+                <div class="card" style="text-align: center; padding: 32px;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">⏳</div>
+                    <p style="color: var(--text-secondary);">Loading leaderboard...</p>
+                </div>
             </div>
         </div>
     `;
@@ -1184,22 +1194,25 @@ async function renderLeaderboard() {
 
 function renderLeaderboardList(data) {
     if (!data || data.length === 0) {
-        return '<div class="card" style="text-align: center; padding: 32px;">No data available yet</div>';
+        return '<div class="card" style="text-align: center; padding: 32px;">No data available yet. Complete some quizzes to appear on the leaderboard!</div>';
     }
     
+    // Get currentUser from window if available (set by firebase-config.js)
+    const userId = window.currentUser?.uid || null;
+    
     return data.map((entry, index) => `
-        <div class="card" style="display: flex; justify-content: space-between; align-items: center; ${entry.userId === currentUser?.uid ? 'background: var(--accent-primary); color: white;' : ''}">
+        <div class="card" style="display: flex; justify-content: space-between; align-items: center; ${entry.userId === userId ? 'background: var(--accent-primary); color: white;' : ''}">
             <div style="display: flex; align-items: center; gap: 16px;">
                 <div style="font-size: 24px; font-weight: 700; min-width: 40px;">
                     ${index + 1}${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : ''}
                 </div>
                 <div>
-                    <div style="font-weight: 600;">${entry.username}</div>
-                    <div style="font-size: 12px; opacity: 0.8;">Level ${entry.level}</div>
+                    <div style="font-weight: 600;">${entry.username || 'Anonymous'}</div>
+                    <div style="font-size: 12px; opacity: 0.8;">Level ${entry.level || 1}</div>
                 </div>
             </div>
             <div style="text-align: right;">
-                <div style="font-size: 20px; font-weight: 700;">${entry.totalPoints}</div>
+                <div style="font-size: 20px; font-weight: 700;">${entry.totalPoints || 0}</div>
                 <div style="font-size: 12px; opacity: 0.8;">points</div>
             </div>
         </div>
