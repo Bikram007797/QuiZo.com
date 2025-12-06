@@ -1,10 +1,14 @@
 // State Management
 const STATE = {
     user: {
+        username: '',  // Add this line
         points: 0,
         coins: 0,
         xp: 0,
         level: 1,
+        dailyPoints: 0,  // Add this
+        weeklyPoints: 0,  // Add this
+        monthlyPoints: 0,  // Add this
         soundEnabled: true,
         theme: 'light'
     },
@@ -26,7 +30,7 @@ const STATE = {
     quizState: null
 };
 
-// Load state from localStorage
+// Load state from localStorage (Firebase will override if available)
 function loadState() {
     try {
         const saved = localStorage.getItem('quizo_state');
@@ -35,15 +39,25 @@ function loadState() {
             Object.assign(STATE, parsed);
             applyTheme();
         }
+        
+        // Initialize Firebase
+        if (typeof initFirebase === 'function') {
+            initFirebase();
+        }
     } catch (e) {
         console.error('Error loading state:', e);
     }
 }
 
-// Save state to localStorage
+// Save state to localStorage AND Firebase
 function saveState() {
     try {
         localStorage.setItem('quizo_state', JSON.stringify(STATE));
+        
+        // Also save to Firebase if available
+        if (typeof saveUserDataToFirebase === 'function') {
+            saveUserDataToFirebase();
+        }
     } catch (e) {
         console.error('Error saving state:', e);
     }
@@ -231,6 +245,9 @@ function render() {
         case 'bookmarks':
             content = renderBookmarks();
             break;
+        case 'leaderboard':
+            content = renderLeaderboard();
+            break;
     }
     
     app.innerHTML = content + '<div class="watermark">QUIZO</div>';
@@ -278,24 +295,28 @@ function renderHome() {
                 <p style="color: var(--text-secondary);">Choose your challenge and start learning!</p>
             </div>
             
-            <div class="cta-grid">
-                <div class="card cta-card" onclick="navigate('challenge', 'daily')">
-                    <div style="font-size: 48px; margin-bottom: 12px;">📅</div>
-                    Daily Challenge
-                </div>
-                <div class="card cta-card" onclick="navigate('challenge', 'weekly')">
-                    <div style="font-size: 48px; margin-bottom: 12px;">📊</div>
-                    Weekly Challenge
-                </div>
-                <div class="card cta-card" onclick="navigate('bookmarks')">
-                    <div style="font-size: 48px; margin-bottom: 12px;">🔖</div>
-                    Bookmarks
-                </div>
-                <div class="card cta-card" onclick="navigate('profile')">
-                    <div style="font-size: 48px; margin-bottom: 12px;">👤</div>
-                    Profile
-                </div>
-            </div>
+           <div class="cta-grid">
+    <div class="card cta-card" onclick="navigate('challenge', 'daily')">
+        <div style="font-size: 48px; margin-bottom: 12px;">📅</div>
+        Daily Challenge
+    </div>
+    <div class="card cta-card" onclick="navigate('challenge', 'weekly')">
+        <div style="font-size: 48px; margin-bottom: 12px;">📊</div>
+        Weekly Challenge
+    </div>
+    <div class="card cta-card" onclick="navigate('bookmarks')">
+        <div style="font-size: 48px; margin-bottom: 12px;">🔖</div>
+        Bookmarks
+    </div>
+    <div class="card cta-card" onclick="navigate('profile')">
+        <div style="font-size: 48px; margin-bottom: 12px;">👤</div>
+        Profile
+    </div>
+    <div class="card cta-card" onclick="navigate('leaderboard')">
+        <div style="font-size: 48px; margin-bottom: 12px;">🏆</div>
+        Leaderboard
+    </div>
+</div>
         </div>
     `;
 }
@@ -397,25 +418,32 @@ function renderChapters() {
                 const setKey = `${type}_${subject}_${chapterIdx}_${setIdx}`;
                 const progress = STATE.progress[setKey] || { attempts: 0, bestScore: 0, completed: false };
                 
-                return `
-                    <div class="card set-card" onclick="navigate('sets', {type: '${type}', subject: '${subject}', chapterIdx: ${chapterIdx}, setIdx: ${setIdx}})">
-                        <div class="card-header">
-                            <div>
-                                <div class="card-title">📝 Set ${setIdx + 1}</div>
-                                <div class="set-progress">
-                                    Attempts: ${progress.attempts} | Best Score: ${progress.bestScore}/5
-                                    ${progress.completed ? ' ✓ Completed' : ''}
-                                </div>
-                            </div>
-                            <div>
-                                ${progress.bestScore === 5 ? '🏅' : progress.bestScore >= 3 ? '⭐' : ''}
-                            </div>
-                        </div>
-                        <button class="btn btn-primary" style="margin-top: 12px; width: 100%;" onclick="event.stopPropagation(); startQuiz('${type}', '${subject}', ${chapterIdx}, ${setIdx})">
-                            ${progress.attempts > 0 ? 'Play Again' : 'Start Quiz'}
-                        </button>
-                    </div>
-                `;
+               return `
+    <div class="card set-card" onclick="navigate('sets', {type: '${type}', subject: '${subject}', chapterIdx: ${chapterIdx}, setIdx: ${setIdx}})">
+        <div class="card-header">
+            <div>
+                <div class="card-title">📝 Set ${setIdx + 1}</div>
+                <div class="set-progress">
+                    Attempts: ${progress.attempts} | Best Score: ${progress.bestScore}/5
+                    ${progress.completed ? ' ✓ Completed' : ''}
+                </div>
+            </div>
+            <div>
+                ${progress.bestScore === 5 ? '🏅' : progress.bestScore >= 3 ? '⭐' : ''}
+            </div>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 12px;">
+            <button class="btn btn-primary" style="flex: 1;" onclick="event.stopPropagation(); startQuiz('${type}', '${subject}', ${chapterIdx}, ${setIdx})">
+                ${progress.attempts > 0 ? 'Play Again' : 'Start Quiz'}
+            </button>
+            ${progress.attempts > 0 ? `
+                <button class="btn btn-secondary" onclick="event.stopPropagation(); viewLastAttempt('${type}', '${subject}', ${chapterIdx}, ${setIdx})">
+                    👁️ View Solutions
+                </button>
+            ` : ''}
+        </div>
+    </div>
+`;
             }).join('')}
         </div>
     `;
@@ -548,15 +576,12 @@ function renderQuiz() {
 function selectAnswer(optionIdx) {
     if (!STATE.quizState) return;
     
-    const { currentQuestion, answers } = STATE.quizState;
+    const { currentQuestion } = STATE.quizState;
     
-    if (answers[currentQuestion] !== undefined) return;
-    
-    const timeTaken = Date.now() - STATE.quizState.questionStartTime;
-    STATE.quizState.questionTimes.push(timeTaken);
+    // Allow changing answer before submission
     STATE.quizState.answers[currentQuestion] = optionIdx;
+    STATE.quizState.questionStartTime = Date.now(); // Reset timer for this question
     
-    // Remove instant feedback - just play click sound
     playSound('click');
     vibrate(50);
     
@@ -687,7 +712,7 @@ function submitQuiz() {
     
     // XP for completed set
     if (correctCount === 5) {
-        xpEarned = 30; // Extra XP for perfect score
+        xpEarned = 30;
     } else if (correctCount >= 3) {
         xpEarned = 15;
     }
@@ -702,6 +727,12 @@ function submitQuiz() {
     STATE.user.points += pointsEarned;
     STATE.user.coins += coinsEarned;
     STATE.user.xp += xpEarned;
+    
+    // Update daily/weekly/monthly points
+    const now = new Date();
+    STATE.user.dailyPoints = (STATE.user.dailyPoints || 0) + pointsEarned;
+    STATE.user.weeklyPoints = (STATE.user.weeklyPoints || 0) + pointsEarned;
+    STATE.user.monthlyPoints = (STATE.user.monthlyPoints || 0) + pointsEarned;
     
     const oldLevel = STATE.user.level;
     STATE.user.level = calculateLevel(STATE.user.xp);
@@ -718,6 +749,20 @@ function submitQuiz() {
         leveledUp: STATE.user.level > oldLevel,
         newBadges
     };
+    
+    // Save last attempt to Firebase
+    if (typeof saveLastAttempt === 'function') {
+        saveLastAttempt(setKey, {
+            type,
+            subject,
+            chapterIdx,
+            setIdx,
+            questions,
+            answers,
+            results: STATE.quizState.results,
+            totalTime
+        });
+    }
     
     saveState();
     
@@ -1087,3 +1132,84 @@ document.addEventListener('DOMContentLoaded', () => {
 loadState();
 render();
 });
+
+async function viewLastAttempt(type, subject, chapterIdx, setIdx) {
+    const setKey = `${type}_${subject}_${chapterIdx}_${setIdx}`;
+    
+    if (typeof loadLastAttempt === 'function') {
+        const lastAttempt = await loadLastAttempt(setKey);
+        
+        if (lastAttempt) {
+            STATE.quizState = {
+                ...lastAttempt,
+                viewOnly: true  // Flag to indicate view-only mode
+            };
+            navigate('report');
+        } else {
+            alert('No previous attempt found for this quiz.');
+        }
+    } else {
+        alert('Firebase not initialized. Cannot load last attempt.');
+    }
+}
+
+async function renderLeaderboard() {
+    const leaderboardData = await fetchLeaderboard('total');
+    
+    return `
+        <div class="header">
+            <button class="btn btn-icon" onclick="navigate('home')" aria-label="Back">
+                ← Back
+            </button>
+            <div class="app-name">Leaderboard</div>
+            <button class="btn btn-icon" onclick="toggleTheme()" aria-label="Toggle theme">
+                ${STATE.user.theme === 'light' ? '🌙' : '☀️'}
+            </button>
+        </div>
+        
+        <div class="container">
+            <div style="display: flex; gap: 8px; margin: 16px 0;">
+                <button class="btn btn-secondary" onclick="switchLeaderboard('total')">🏆 All Time</button>
+                <button class="btn btn-secondary" onclick="switchLeaderboard('daily')">📅 Daily</button>
+                <button class="btn btn-secondary" onclick="switchLeaderboard('weekly')">📊 Weekly</button>
+                <button class="btn btn-secondary" onclick="switchLeaderboard('monthly')">📆 Monthly</button>
+            </div>
+            
+            <div id="leaderboard-content">
+                ${renderLeaderboardList(leaderboardData)}
+            </div>
+        </div>
+    `;
+}
+
+function renderLeaderboardList(data) {
+    if (!data || data.length === 0) {
+        return '<div class="card" style="text-align: center; padding: 32px;">No data available yet</div>';
+    }
+    
+    return data.map((entry, index) => `
+        <div class="card" style="display: flex; justify-content: space-between; align-items: center; ${entry.userId === currentUser?.uid ? 'background: var(--accent-primary); color: white;' : ''}">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <div style="font-size: 24px; font-weight: 700; min-width: 40px;">
+                    ${index + 1}${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : ''}
+                </div>
+                <div>
+                    <div style="font-weight: 600;">${entry.username}</div>
+                    <div style="font-size: 12px; opacity: 0.8;">Level ${entry.level}</div>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 20px; font-weight: 700;">${entry.totalPoints}</div>
+                <div style="font-size: 12px; opacity: 0.8;">points</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function switchLeaderboard(type) {
+    const data = await fetchLeaderboard(type);
+    const content = document.getElementById('leaderboard-content');
+    if (content) {
+        content.innerHTML = renderLeaderboardList(data);
+    }
+}
