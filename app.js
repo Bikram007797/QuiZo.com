@@ -1003,16 +1003,31 @@ playSound('click');
 render();
 }
 function attachEventListeners() {
-// Timer update for quiz page
-if (STATE.currentScreen === 'quiz' && STATE.quizState) {
-const timerInterval = setInterval(() => {
-if (STATE.currentScreen !== 'quiz') {
-clearInterval(timerInterval);
-return;
+    // Timer update for quiz page
+    if (STATE.currentScreen === 'quiz' && STATE.quizState) {
+        const timerInterval = setInterval(() => {
+            if (STATE.currentScreen !== 'quiz') {
+                clearInterval(timerInterval);
+                return;
+            }
+            // Only update the timer display, not the entire page
+            updateTimer();
+        }, 1000);
+    }
 }
-render();
-}, 1000);
-}
+
+// Add this new function after attachEventListeners
+function updateTimer() {
+    if (!STATE.quizState) return;
+    
+    const elapsed = Math.floor((Date.now() - STATE.quizState.startTime) / 1000);
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = elapsed % 60;
+    
+    const timerElement = document.querySelector('.timer');
+    if (timerElement) {
+        timerElement.textContent = `⏱️ ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
 }
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
