@@ -328,6 +328,7 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     min-height: 56px;
+    color: var(--text-primary); /* Ensure proper text color */
 }
 
 .option-btn:hover {
@@ -338,19 +339,19 @@ body {
 .option-btn.selected {
     border-color: var(--accent-primary);
     background: var(--accent-primary);
-    color: white;
+    color: white !important; /* Force white text on selected */
 }
 
 .option-btn.correct {
     border-color: var(--success);
     background: var(--success);
-    color: white;
+    color: white !important; /* Force white text on correct */
 }
 
 .option-btn.incorrect {
     border-color: var(--error);
     background: var(--error);
-    color: white;
+    color: white !important; /* Force white text on incorrect */
 }
 
 .option-btn:disabled {
