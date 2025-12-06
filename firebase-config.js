@@ -12,6 +12,8 @@ const firebaseConfig = {
 let auth, db;
 let currentUser = null;
 
+// Make currentUser accessible globally
+window.currentUser = null;
 async function initFirebase() {
     try {
         // Import Firebase modules
@@ -28,6 +30,7 @@ async function initFirebase() {
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
+                window.currentUser = user; // ✅ Add this line
                 await loadUserDataFromFirebase();
             } else {
                 await signInAnonymously(auth);
