@@ -459,6 +459,9 @@ function renderQuiz() {
     
     const containerClass = isFullscreen ? 'quiz-container fullscreen-mode' : 'quiz-container';
     
+    // Count answered questions
+    const answeredCount = answers.filter(a => a !== undefined).length;
+    
     return `
         <div class="${containerClass}">
             <div class="quiz-header">
@@ -486,7 +489,7 @@ function renderQuiz() {
             
             <div class="question-container slide-in">
                 <div class="question-progress">
-                    Question ${currentQuestion + 1} of ${questions.length}
+                    Question ${currentQuestion + 1} of ${questions.length} | Answered: ${answeredCount}/${questions.length}
                 </div>
                 
                 <h2 class="question-text">${question.question}</h2>
@@ -496,19 +499,15 @@ function renderQuiz() {
                         const answer = answers[currentQuestion];
                         let className = 'option-btn';
                         
-                        if (answer !== undefined) {
-                            if (idx === question.correct) {
-                                className += ' correct';
-                            } else if (idx === answer) {
-                                className += ' incorrect';
-                            }
+                        // Only show selected state, not correct/incorrect
+                        if (answer === idx) {
+                            className += ' selected';
                         }
                         
                         return `
                             <button 
                                 class="${className}" 
                                 onclick="selectAnswer(${idx})"
-                                ${answer !== undefined ? 'disabled' : ''}
                             >
                                 ${String.fromCharCode(65 + idx)}. ${option}
                             </button>
@@ -527,13 +526,18 @@ function renderQuiz() {
                     ← Previous
                 </button>
                 
-                ${currentQuestion === questions.length - 1 && answers[currentQuestion] !== undefined
-                    ? `<button class="btn btn-primary" onclick="submitQuiz()">Submit Quiz</button>`
+                ${currentQuestion === questions.length - 1
+                    ? `<button 
+                        class="btn btn-primary" 
+                        onclick="submitQuiz()"
+                        ${answeredCount < questions.length ? 'disabled' : ''}
+                        style="${answeredCount < questions.length ? 'opacity: 0.5; cursor: not-allowed;' : ''}"
+                       >
+                        Finish Quiz
+                       </button>`
                     : `<button 
                         class="btn btn-primary" 
                         onclick="nextQuestion()"
-                        ${answers[currentQuestion] === undefined ? 'disabled' : ''}
-                        style="${answers[currentQuestion] === undefined ? 'opacity: 0.5; cursor: not-allowed;' : ''}"
                        >
                         Next →
                        </button>`
@@ -546,35 +550,20 @@ function renderQuiz() {
 function selectAnswer(optionIdx) {
     if (!STATE.quizState) return;
     
-    const { questions, currentQuestion, answers, questionStartTime } = STATE.quizState;
+    const { currentQuestion, answers } = STATE.quizState;
     
     if (answers[currentQuestion] !== undefined) return;
     
-    const timeTaken = Date.now() - questionStartTime;
+    const timeTaken = Date.now() - STATE.quizState.questionStartTime;
     STATE.quizState.questionTimes.push(timeTaken);
     STATE.quizState.answers[currentQuestion] = optionIdx;
     
-    const question = questions[currentQuestion];
-    const isCorrect = optionIdx === question.correct;
-    
-    vibrate(isCorrect ? [50, 50, 50] : 100);
-    playSound(isCorrect ? 'correct' : 'incorrect');
-    
-    // Show reward popup briefly
-    if (isCorrect) {
-        const popup = document.createElement('div');
-        popup.className = 'reward-popup';
-        popup.innerHTML = `
-            <div style="font-size: 32px; margin-bottom: 8px;">✨</div>
-            <div style="font-weight: 600;">+10 Points, +2 Coins!</div>
-        `;
-        document.body.appendChild(popup);
-        setTimeout(() => popup.remove(), 1500);
-    }
+    // Remove instant feedback - just play click sound
+    playSound('click');
+    vibrate(50);
     
     render();
 }
-
 function nextQuestion() {
     if (!STATE.quizState) return;
     
@@ -586,7 +575,9 @@ function nextQuestion() {
 }
 
 function previousQuestion() {
-    if (!STATE.quizState && STATE.quizState.currentQuestion > 0) {
+    if (!STATE.quizState) return;  // ❌ Remove the extra &&
+    
+    if (STATE.quizState.currentQuestion > 0) {
         STATE.quizState.currentQuestion--;
         STATE.quizState.questionStartTime = Date.now();
         render();
@@ -728,6 +719,10 @@ function renderReport() {
     const seconds = Math.floor((totalTime % 60000) / 1000);
     const accuracy = Math.round((correctCount / questions.length) * 100);
     
+    // Calculate attempted, correct, wrong
+    const attemptedCount = answers.filter(a => a !== undefined).length;
+    const wrongCount = attemptedCount - correctCount;
+    
     const setKey = `${type}_${subject}_${chapterIdx}_${setIdx}`;
     
     return `
@@ -746,9 +741,12 @@ function renderReport() {
                 <div style="font-size: 64px; margin-bottom: 16px;">
                     ${correctCount === 5 ? '🏆' : correctCount >= 3 ? '⭐' : '💪'}
                 </div>
-                <div class="report-score">${correctCount}/5</div>
-                <div style="font-size: 18px; margin-bottom: 24px;">
+                <div class="report-score">${correctCount}/${questions.length}</div>
+                <div style="font-size: 18px; margin-bottom: 16px;">
                     ${correctCount === 5 ? 'Perfect Score!' : correctCount >= 3 ? 'Great Job!' : 'Keep Practicing!'}
+                </div>
+                <div style="font-size: 16px; opacity: 0.9;">
+                    ✅ Correct: ${correctCount} | ❌ Wrong: ${wrongCount} | 📝 Attempted: ${attemptedCount}
                 </div>
                 
                 <div class="report-stats">
