@@ -516,7 +516,7 @@ function renderQuiz() {
                 </div>
             </div>
             
-            <div class="quiz-navigation">
+           <div class="quiz-navigation">
                 <button 
                     class="btn btn-secondary" 
                     onclick="previousQuestion()"
@@ -530,8 +530,6 @@ function renderQuiz() {
                     ? `<button 
                         class="btn btn-primary" 
                         onclick="submitQuiz()"
-                        ${answeredCount < questions.length ? 'disabled' : ''}
-                        style="${answeredCount < questions.length ? 'opacity: 0.5; cursor: not-allowed;' : ''}"
                        >
                         Finish Quiz
                        </button>`
@@ -591,6 +589,27 @@ function toggleBookmark() {
     const question = questions[currentQuestion];
     
     const bookmarkIdx = STATE.bookmarks.findIndex(b => b.id === question.id);
+    
+    if (bookmarkIdx >= 0) {
+        STATE.bookmarks.splice(bookmarkIdx, 1);
+    } else {
+        STATE.bookmarks.push({
+            ...question,
+            source: `${type} > ${subject} > Ch${chapterIdx + 1} > Set${setIdx + 1}`
+        });
+    }
+    
+    saveState();
+    playSound('click');
+    render();
+}
+function toggleBookmarkFromReport(questionId, type, subject, chapterIdx, setIdx) {
+    if (!STATE.quizState) return;
+    
+    const question = STATE.quizState.questions.find(q => q.id === questionId);
+    if (!question) return;
+    
+    const bookmarkIdx = STATE.bookmarks.findIndex(b => b.id === questionId);
     
     if (bookmarkIdx >= 0) {
         STATE.bookmarks.splice(bookmarkIdx, 1);
@@ -722,6 +741,7 @@ function renderReport() {
     // Calculate attempted, correct, wrong
     const attemptedCount = answers.filter(a => a !== undefined).length;
     const wrongCount = attemptedCount - correctCount;
+     const skippedCount = questions.length - attemptedCount;
     
     const setKey = `${type}_${subject}_${chapterIdx}_${setIdx}`;
     
@@ -746,7 +766,7 @@ function renderReport() {
                     ${correctCount === 5 ? 'Perfect Score!' : correctCount >= 3 ? 'Great Job!' : 'Keep Practicing!'}
                 </div>
                 <div style="font-size: 16px; opacity: 0.9;">
-                    ✅ Correct: ${correctCount} | ❌ Wrong: ${wrongCount} | 📝 Attempted: ${attemptedCount}
+                    ✅ Correct: ${correctCount} | ❌ Wrong: ${wrongCount} | ⊝ Skipped: ${skippedCount}
                 </div>
                 
                 <div class="report-stats">
@@ -797,15 +817,22 @@ function renderReport() {
         ${questions.map((q, idx) => {
             const userAnswer = answers[idx];
             const isCorrect = userAnswer === q.correct;
+            const isSkipped = userAnswer === undefined;
+            const isBookmarked = STATE.bookmarks.some(b => b.id === q.id);
             
             return `
                 <div class="card question-review ${idx === 0 ? 'expanded' : ''}" id="review-${idx}">
                     <div class="question-review-header" onclick="toggleReview(${idx})">
                         <div>
                             <strong>Question ${idx + 1}</strong>
-                            ${isCorrect ? ' ✓' : ' ✗'}
+                            ${isSkipped ? ' ⊝ Skipped' : isCorrect ? ' ✓' : ' ✗'}
                         </div>
-                        <span>▼</span>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <button class="btn btn-icon" onclick="event.stopPropagation(); toggleBookmarkFromReport('${q.id}', '${type}', '${subject}', ${chapterIdx}, ${setIdx})" style="font-size: 20px;">
+                                ${isBookmarked ? '🔖' : '📑'}
+                            </button>
+                            <span>▼</span>
+                        </div>
                     </div>
                     <div class="question-review-content">
                         <p style="font-weight: 600; margin-bottom: 16px;">${q.question}</p>
@@ -818,11 +845,14 @@ function renderReport() {
                             return `
                                 <div class="${className}">
                                     ${String.fromCharCode(65 + optIdx)}. ${opt}
-                                    ${optIdx === q.correct ? ' ✓ Correct' : ''}
-                                    ${optIdx === userAnswer && !isCorrect ? ' ✗ Your answer' : ''}
+                                    ${optIdx === q.correct ? ' ✓ Correct Answer' : ''}
+                                    ${optIdx === userAnswer && !isCorrect ? ' ✗ Your Answer' : ''}
+                                    ${optIdx === userAnswer && isCorrect ? ' ✓ Your Answer' : ''}
                                 </div>
                             `;
                         }).join('')}
+                        
+                        ${isSkipped ? '<div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; margin: 8px 0; color: var(--text-secondary);">You skipped this question</div>' : ''}
                         
                         <div class="explanation">
                             <strong>Explanation:</strong> ${q.explanation}
@@ -833,7 +863,7 @@ function renderReport() {
         }).join('')}
     </div>
 `;
-  }
+}
 function toggleReview(idx) {
 const element = document.getElementById(`review-${idx}`);
 if (element) {
@@ -960,39 +990,64 @@ location.reload();
 }
 }
 function renderBookmarks() {
-return `
-<div class="header">
-<button class="btn btn-icon" onclick="navigate('home')" aria-label="Back">
-← Back
-</button>
-<div class="app-name">Bookmarks</div>
-<button class="btn btn-icon" onclick="toggleTheme()" aria-label="Toggle theme">
-${STATE.user.theme === 'light' ? '🌙' : '☀️'}
-</button>
-</div>
-<div class="container">
-        <h3 style="margin: 24px 0 16px; font-size: 20px;">
-            Saved Questions (${STATE.bookmarks.length})
-        </h3>
+    // Group bookmarks by source
+    const groupedBookmarks = {};
+    STATE.bookmarks.forEach((bookmark, idx) => {
+        const source = bookmark.source;
+        if (!groupedBookmarks[source]) {
+            groupedBookmarks[source] = [];
+        }
+        groupedBookmarks[source].push({ ...bookmark, originalIdx: idx });
+    });
+    
+    return `
+        <div class="header">
+            <button class="btn btn-icon" onclick="navigate('home')" aria-label="Back">
+                ← Back
+            </button>
+            <div class="app-name">Bookmarks</div>
+            <button class="btn btn-icon" onclick="toggleTheme()" aria-label="Toggle theme">
+                ${STATE.user.theme === 'light' ? '🌙' : '☀️'}
+            </button>
+        </div>
         
-        ${STATE.bookmarks.length === 0 ? `
-            <div class="card" style="text-align: center; padding: 48px;">
-                <div style="font-size: 48px; margin-bottom: 16px;">📑</div>
-                <p style="color: var(--text-secondary);">No bookmarked questions yet. Start a quiz and bookmark questions for later review!</p>
-            </div>
-        ` : STATE.bookmarks.map((bookmark, idx) => `
-            <div class="card bookmark-item">
-                <div class="bookmark-source">${bookmark.source}</div>
-                <div class="bookmark-question">${bookmark.question}</div>
-                <div style="display: flex; gap: 12px; margin-top: 12px;">
-                    <button class="btn btn-secondary" style="flex: 1;" onclick="removeBookmark(${idx})">
-                        Remove 🗑️
-                    </button>
+        <div class="container">
+            <h3 style="margin: 24px 0 16px; font-size: 20px;">
+                Saved Questions (${STATE.bookmarks.length})
+            </h3>
+            
+            ${STATE.bookmarks.length === 0 ? `
+                <div class="card" style="text-align: center; padding: 48px;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📑</div>
+                    <p style="color: var(--text-secondary);">No bookmarked questions yet. Start a quiz and bookmark questions for later review!</p>
                 </div>
-            </div>
-        `).join('')}
-    </div>
-`;
+            ` : Object.keys(groupedBookmarks).map(source => `
+                <div class="card" style="margin-bottom: 24px;">
+                    <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--accent-primary);">
+                        📚 ${source}
+                    </h4>
+                    ${groupedBookmarks[source].map(bookmark => `
+                        <div class="bookmark-item" style="margin-bottom: 12px; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                <div style="flex: 1;">
+                                    <div class="bookmark-question" style="font-weight: 600; margin-bottom: 8px;">${bookmark.question}</div>
+                                    <div style="font-size: 12px; color: var(--text-secondary);">
+                                        ✓ ${bookmark.options[bookmark.correct]}
+                                    </div>
+                                </div>
+                                <button class="btn btn-icon" onclick="removeBookmark(${bookmark.originalIdx})" style="margin-left: 8px;">
+                                    🗑️
+                                </button>
+                            </div>
+                            <div class="explanation" style="font-size: 13px;">
+                                <strong>Explanation:</strong> ${bookmark.explanation}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('')}
+        </div>
+    `;
 }
 function removeBookmark(idx) {
 STATE.bookmarks.splice(idx, 1);
