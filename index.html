@@ -8,8 +8,27 @@
 </head>
 <body>
     <div id="app"></div>
+    
+    <!-- Load in this order -->
     <script src="questions.js"></script>
-    <script type="module" src="firebase-config.js"></script>
+    <script type="module">
+        // Import and expose Firebase functions globally
+        import { 
+            initFirebase, 
+            saveUserDataToFirebase, 
+            loadUserDataFromFirebase,
+            saveLastAttempt,
+            loadLastAttempt,
+            fetchLeaderboard
+        } from './firebase-config.js';
+        
+        window.initFirebase = initFirebase;
+        window.saveUserDataToFirebase = saveUserDataToFirebase;
+        window.loadUserDataFromFirebase = loadUserDataFromFirebase;
+        window.saveLastAttempt = saveLastAttempt;
+        window.loadLastAttempt = loadLastAttempt;
+        window.fetchLeaderboard = fetchLeaderboard;
+    </script>
     <script src="app.js"></script>
 </body>
 </html>
