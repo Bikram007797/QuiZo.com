@@ -1226,3 +1226,11 @@ async function switchLeaderboard(type) {
         content.innerHTML = renderLeaderboardList(data);
     }
 }
+
+// Fallback if Firebase functions aren't loaded
+if (typeof fetchLeaderboard !== 'function') {
+    window.fetchLeaderboard = async function(type) {
+        console.warn('Firebase not loaded, returning empty leaderboard');
+        return [];
+    };
+}
