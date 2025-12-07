@@ -186,41 +186,183 @@ const QUIZ_DATA = {
                 {
                     name: "Latitude and Longitude",
                     questions: [
-                        {
-                            id: "geo_d_c2_q1",
-                            question: "What is the Prime Meridian?",
-                            options: ["0° latitude", "0° longitude", "90° latitude", "180° longitude"],
-                            correct: 1,
-                            explanation: "The Prime Meridian is the line of 0° longitude that passes through Greenwich, England."
-                        },
-                        {
-                            id: "geo_d_c2_q2",
-                            question: "What is the Equator?",
-                            options: ["0° longitude", "0° latitude", "90° longitude", "180° latitude"],
-                            correct: 1,
-                            explanation: "The Equator is the imaginary line at 0° latitude that divides Earth into Northern and Southern hemispheres."
-                        },
-                        {
-                            id: "geo_d_c2_q3",
-                            question: "How many degrees of latitude are there from the Equator to the North Pole?",
-                            options: ["45°", "90°", "180°", "360°"],
-                            correct: 1,
-                            explanation: "There are 90 degrees of latitude from the Equator (0°) to the North Pole (90°N)."
-                        },
-                        {
-                            id: "geo_d_c2_q4",
-                            question: "Which line of latitude is located at 23.5°N?",
-                            options: ["Tropic of Cancer", "Tropic of Capricorn", "Arctic Circle", "Antarctic Circle"],
-                            correct: 0,
-                            explanation: "The Tropic of Cancer is located at approximately 23.5° North latitude."
-                        },
-                        {
-                            id: "geo_d_c2_q5",
-                            question: "Lines of longitude are also called:",
-                            options: ["Parallels", "Meridians", "Tropics", "Circles"],
-                            correct: 1,
-                            explanation: "Lines of longitude are called meridians and run from the North Pole to the South Pole."
-                        }
+                       
+    {
+        "id": "geo_d_c1_q1",
+        "question": "What is the shape of the Earth commonly referred to in geography, characterized by being slightly flat at the poles and bulged at the equator?",
+        "options": ["Perfect Sphere", "Oblate Spheroid", "Pear Shape", "Circular Disc"],
+        "correct": 1,
+        "explanation": "The Earth's shape is described as a Geoid or Oblate Spheroid, which is a little flat from the top and bottom (poles) and bulged at the center (equator) due to centrifugal force."
+    },
+    {
+        "id": "geo_d_c1_q2",
+        "question": "What is the specific angular distance (longitude) of the Prime Meridian, also known as the Greenwich Meridian?",
+        "options": ["90∘ East", "180∘ Longitude", "0∘ Longitude", "23.5∘ North"],
+        "correct": 2,
+        "explanation": "The Prime Meridian's specific angular distance (longitude) is 0∘ Longitude. This line, which passes through Greenwich, England, is the internationally accepted reference point from which all other longitudes are measured, 180∘ to the East and 180∘ to the West."
+    },
+    {
+        "id": "geo_d_c1_q3",
+        "question": "What is the primary cause for the occurrence of Tides (the periodic rise and fall of ocean water levels)?",
+        "options": ["Earth's Rotation", "Gravitational pull of the Moon", "Earth's Revolution", "Centrifugal Force"],
+        "correct": 1,
+        "explanation": "Tides are caused primarily by the gravitational pull of the Moon."
+    },
+    {
+        "id": "geo_d_c1_q4",
+        "question": "How many total degrees of longitude are used to divide the Earth?",
+        "options": ["361", "180", "360", "181"],
+        "correct": 2,
+        "explanation": "The total number of longitudes is 360 (from to East and to West)."
+    },
+    {
+        "id": "geo_d_c1_q5",
+        "question": "Which date marks the occurrence of Aphelion, the point when the Earth is farthest from the Sun in its orbit?",
+        "options": ["3rd January", "21st June", "4th July", "22nd December"],
+        "correct": 2,
+        "explanation": "Aphelion (अपसौर) occurs on 4th July, when the distance between the Earth and the Sun is maximum (152.1 million kilometers)."
+    },
+    {
+        "id": "geo_d_c1_q6",
+        "question": "The Earth rotates on its own axis from which direction?",
+        "options": ["East to West", "North to South", "West to East", "South to North"],
+        "correct": 2,
+        "explanation": "The Earth rotates on its own axis from West to East, which is counter-clockwise (Anticlockwise)."
+    },
+    {
+        "id": "geo_d_c1_q7",
+        "question": "What is the approximate distance between two consecutive lines of latitude (for of latitude)?",
+        "options": ["100 km", "111 km", "120 km", "150 km"],
+        "correct": 1,
+        "explanation": "The distance between each degree of latitude is approximately 111 km."
+    },
+    {
+        "id": "geo_d_c1_q8",
+        "question": "Which line of latitude demarcates the northern extent of the Torrid Zone?",
+        "options": ["Equator", "Arctic Circle", "Tropic of Capricorn", "Tropic of Cancer"],
+        "correct": 3,
+        "explanation": "The Torrid Zone is located between the Tropic of Cancer (23∘5′′N) and the Tropic of Capricorn (23∘5′′S)."
+    },
+    {
+        "id": "geo_d_c1_q9",
+        "question": "The movement of Earth around the Sun in an elliptical orbit is called:",
+        "options": ["Rotation", "Axial Inclination", "Revolution", "Eclipse"],
+        "correct": 2,
+        "explanation": "The Earth revolves around the Sun in an elliptical orbit, a process called Revolution."
+    },
+    {
+        "id": "geo_d_c1_q10",
+        "question": "In which specific alignment of the Earth, Moon, and Sun does a Lunar Eclipse happen?",
+        "options": ["Moon comes between Sun and Earth", "Earth comes between Sun and Moon", "Sun comes between Moon and Earth", "Moon is perpendicular to Sun and Earth"],
+        "correct": 1,
+        "explanation": "A Lunar eclipse occurs when the Earth comes between the Sun and the Moon, casting the Earth's shadow on the Moon."
+    },
+    {
+        "id": "geo_d_c1_q11",
+        "question": "What is the precise duration of the Earth's Revolution around the Sun, as mentioned in the document?",
+        "options": ["365 days 6 hours", "365 days 6 hours 9 minutes", "365 days 5 hours 48 minutes", "365 days 6 hours 4 minutes"],
+        "correct": 1,
+        "explanation": "One complete revolution takes exactly 365 days 6 hours 9 minutes."
+    },
+    {
+        "id": "geo_d_c1_q12",
+        "question": "The equatorial radius of the Earth (6378 km) is greater than the polar radius (6357 km). This difference is primarily due to:",
+        "options": ["Stronger gravitational force at the Equator.", "Greater centrifugal force at the Equator", "Axial inclination of 23.5∘", "The presence of major land masses near the equator"],
+        "correct": 1,
+        "explanation": "The Earth bulges at the center (equator) because of the more Centrifugal force (केन्द्रीय अपसारी बल) at the Equator, which results in a greater equatorial radius."
+    },
+    {
+        "id": "geo_d_c1_q13",
+        "question": "The Indian Standard Time (IST) is ahead of Greenwich Mean Time (GMT) by:",
+        "options": ["4 hours 30 minutes", "5 hours", "5 hours 30 minutes", "6 hours"],
+        "correct": 2,
+        "explanation": ""
+    },
+    {
+        "id": "geo_d_c1_q14",
+        "question": "A geographical grid has:\n1. Lines that run east to west around the globe to mark latitude.\n2. Lines that run north to south from north pole to south pole indicate longitude.\nWhich of the statements given above is/are correct?",
+        "options": ["1 only", "2 only", "Both 1 and 2", "Neither 1 nor 2"],
+        "correct": 2,
+        "explanation": "A geographical grid is formed by the intersection of latitudes (east–west) and longitudes (north–south) — used to determine any location on Earth."
+    },
+    {
+        "id": "geo_d_c1_q15",
+        "question": "What is the value of the Earth's axial inclination (अक्षीय झुकाव) with respect to the perpendicular to the orbital plane?",
+        "options": ["66.5∘", "23.5∘", "90∘", "10∘"],
+        "correct": 1,
+        "explanation": "The axial inclination (अक्षीय झुकाव) is given as 23.5∘(or 23∘30∘)."
+    },
+    {
+        "id": "geo_d_c1_q16",
+        "question": "Which of the following describes the geographical extent of the Frigid Zone in the Southern Hemisphere?",
+        "options": ["Between Tropic of Capricorn and Equator.", "Between Tropic of Capricorn and Antarctic Circle", "Beyond the Antarctic Circle (66.5∘ S)", "Between Antarctic Circle and Equator"],
+        "correct": 2,
+        "explanation": "The Frigid zone is located beyond the Arctic and Antarctic circles and is the coldest region on Earth."
+    },
+    {
+        "id": "geo_d_c1_q17",
+        "question": "Which key event of the Earth's movement around the Sun results in the change of seasons?",
+        "options": ["Earth's Rotation.", "Earth's Revolution and the tilt of its axis.", "Perihelion and Aphelion distance variation.", "Earth's orbital speed fluctuation"],
+        "correct": 1,
+        "explanation": "Seasons are caused by the Earth's revolution around the sun and the tilt of its axis."
+    },
+    {
+        "id": "geo_d_c1_q18",
+        "question": "The distance between two longitudes is maximum at the Equator. What is this maximum distance?",
+        "options": ["111.0 km", "111.32 km", "120.5 km", "105.42 km"],
+        "correct": 1,
+        "explanation": "The distance between each longitude is maximum at the equator at 111.32 km and decreases towards the poles, where it is 0."
+    },
+    {
+        "id": "geo_d_c1_q19",
+        "question": "Which of the following countries is NOT listed as a nation through which the Prime Meridian (0∘ Longitude) passes?",
+        "options": ["Spain", "Algeria", "Mali", "Nigeria"],
+        "correct": 3,
+        "explanation": "The list of countries is: United Kingdom (UK), France, Spain, Algeria, Mali, Burkina Faso, Ghana, and Togo. Nigeria is not on this list."
+    },
+    {
+        "id": "geo_d_c1_q20",
+        "question": "During which position (relative to Earth's orbit) does the phenomenon of a 'Super Moon' occur?",
+        "options": ["When the Moon's orbit is farthest from Earth during a New Moon.", "When the Moon's orbit is closest to Earth during a Full or New Moon.", "When there are two full moons within a single calendar month.", "When the Earth blocks the sun's light causing the moon to look reddish."],
+        "correct": 1,
+        "explanation": "A Super Moon is defined as when the Moon's orbit is closest to Earth during a full/new moon."
+    },
+    {
+        "id": "geo_d_c1_q21",
+        "question": "Which statement is correct concerning the comparison of the Earth's rotational speed (घूर्णी गति) at different geographical locations?",
+        "options": ["Polar speed is greater than Equatorial speed.", "Equatorial speed is greater than Polar speed", "Speed is uniform across all latitudes.", "Speed increases as latitude increases."],
+        "correct": 1,
+        "explanation": "The rotational speed of the Earth is maximum at the Equator and minimum at the Poles (ध्रुव). This is explicitly stated as Equatorial speed (भूमध्यरेखीय गति) >>>>>Polar speed (ध्रुवीय गति)."
+    },
+    {
+        "id": "geo_d_c1_q22",
+        "question": "The Equinox (Equinox) is characterized by which of the following conditions?",
+        "options": ["The North Pole is maximally tilted towards the Sun.", "The Southern Hemisphere experiences Summer Solstice.", "Neither of the poles is tilted towards the Sun.", "The Sun's rays are directly overhead the Tropic of Cancer."],
+        "correct": 2,
+        "explanation": "An Equinox is the time when the Sun’s apparent path crosses the equator, and crucially, neither of the pole is tilted towards the sun, making day and night approximately equal."
+    },
+    {
+        "id": "geo_d_c1_q23",
+        "question": "Why are all lines of Longitude considered 'Great Circles', whereas the Equator is the only line of Latitude that is a Great Circle?",
+        "options": ["Because longitude runs from east to west, dividing the Earth into two equal hemispheres.", "Because longitude is the smallest possible circle that can be drawn around a sphere.", "Because the equator is the largest circle that passes through the center of the Earth, and all longitudes (meridians) also pass through the center.", "Because longitudes connect two poles, while other latitudes are smaller parallel circles."],
+        "correct": 2,
+        "explanation": "A Great Circle is the largest possible circle drawn around a sphere that divides it into two equal parts (Hemispheres). The Equator is the only latitude that passes through the center. All longitudes (meridians) run North to South and form a complete circle that passes through the center; hence they are all Great Circles."
+    },
+    {
+        "id": "geo_d_c1_q24",
+        "question": "A ship crosses the International Date Line (180∘Meridian) while traveling westward (e.g., from the Pacific Ocean towards Asia). Based on the concept of time calculation, what date adjustment must be made?",
+        "options": ["Repeat the same date (add 1 day to the calendar)", "Skip one date (subtract 1 day from the calendar)", "Add 12 hours to the time.", "Subtract 12 hours from the time."],
+        "correct": 0,
+        "explanation": "When moving East from the Prime Meridian, time increases. When moving West, time decreases. Moving West across the IDL means you are moving from a day 'behind' to a day 'ahead'."
+    },
+    {
+        "id": "geo_d_c1_q25",
+        "question": "The maximum tides, known as 'Spring Tides', occur when the Sun, Earth, and Moon are in which specific arrangement?",
+        "options": ["In perpendicular alignment to each other.", "In a straight-line alignment.", "When the Moon is at its farthest point (Apogee).", "During the Equinoxes only."],
+        "correct": 1,
+        "explanation": "Spring Tides occur when the Earth, Moon, and Sun are aligned along a straight line, combining their gravitational pull to produce the maximum tidal range."
+    }
+
                     ]
                 }
             ]
