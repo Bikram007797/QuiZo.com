@@ -821,8 +821,7 @@ function renderReport() {
     const wrongCount = attemptedCount - correctCount;
      const skippedCount = questions.length - attemptedCount;
     
-    const setKey = `${type}_${subject}_${chapterIdx}_${setIdx}`;
-    
+   
     return `
         <div class="header">
            <button class="btn btn-icon" onclick="navigate('subjects', {type: '${type}', subject: '${subject}'})" aria-label="Back">
@@ -882,8 +881,8 @@ function renderReport() {
         </div>
         
         <div style="display: flex; gap: 12px; margin: 24px 0;">
-            <button class="btn btn-secondary" style="flex: 1;" onclick="markAsCompleted('${setKey}')">
-                ${STATE.progress[setKey].completed ? '✓ Completed' : 'Mark Complete'}
+            <button class="btn btn-secondary" style="flex: 1;" onclick="markAsCompleted('${chapterKey}')">
+                ${STATE.progress[chapterKey].completed ? '✓ Completed' : 'Mark Complete'}
             </button>
             <button class="btn btn-primary" style="flex: 1;" onclick="retryQuiz()">
                 🔄 Retry Quiz
