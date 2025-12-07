@@ -3,7 +3,7 @@ const QUIZ_DATA = {
         GEOGRAPHY: {
             chapters: [
                 {
-                   {
+                   
     name: "Solar System",
     questions: [
         {
