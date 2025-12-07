@@ -809,7 +809,7 @@ function submitQuiz() {
 function renderReport() {
     if (!STATE.quizState || !STATE.quizState.results) return renderHome();
     
-    const { questions, answers, results, type, subject, chapterIdx, setIdx } = STATE.quizState;
+    const { questions, answers, results, type, subject, chapterIdx } = STATE.quizState;
     const { correctCount, totalTime, pointsEarned, coinsEarned, xpEarned, leveledUp, newBadges } = results;
     
     const minutes = Math.floor(totalTime / 60000);
@@ -819,12 +819,15 @@ function renderReport() {
     // Calculate attempted, correct, wrong
     const attemptedCount = answers.filter(a => a !== undefined).length;
     const wrongCount = attemptedCount - correctCount;
-     const skippedCount = questions.length - attemptedCount;
+    const skippedCount = questions.length - attemptedCount;
     
-   
+    // FIX: Use the correct key format (without setIdx)
+    const chapterKey = `${type}_${subject}_${chapterIdx}`;
+    const progress = STATE.progress[chapterKey] || { attempts: 0, bestScore: 0, completed: false, bestTime: Infinity };
+    
     return `
         <div class="header">
-           <button class="btn btn-icon" onclick="navigate('subjects', {type: '${type}', subject: '${subject}'})" aria-label="Back">
+            <button class="btn btn-icon" onclick="navigate('subjects', {type: '${type}', subject: '${subject}'})" aria-label="Back">
                 ← Back
             </button>
             <div class="app-name">Quiz Results</div>
@@ -836,11 +839,11 @@ function renderReport() {
         <div class="report-container">
             <div class="report-summary">
                 <div style="font-size: 64px; margin-bottom: 16px;">
-                    ${correctCount === 5 ? '🏆' : correctCount >= 3 ? '⭐' : '💪'}
+                    ${correctCount === questions.length ? '🏆' : correctCount >= Math.ceil(questions.length * 0.6) ? '⭐' : '💪'}
                 </div>
                 <div class="report-score">${correctCount}/${questions.length}</div>
                 <div style="font-size: 18px; margin-bottom: 16px;">
-                    ${correctCount === 5 ? 'Perfect Score!' : correctCount >= 3 ? 'Great Job!' : 'Keep Practicing!'}
+                    ${correctCount === questions.length ? 'Perfect Score!' : correctCount >= Math.ceil(questions.length * 0.6) ? 'Great Job!' : 'Keep Practicing!'}
                 </div>
                 <div style="font-size: 16px; opacity: 0.9;">
                     ✅ Correct: ${correctCount} | ❌ Wrong: ${wrongCount} | ⊝ Skipped: ${skippedCount}
@@ -873,73 +876,73 @@ function renderReport() {
                     </div>
                 </div>
                 ${newBadges.length > 0 ? `
-                <div style="margin-top: 24px; padding: 16px; background: rgba(255,255,255,0.2); border-radius: 12px;">
-                    <div style="font-weight: 600; margin-bottom: 12px;">🎉 New Badges Earned!</div>
-                    ${newBadges.map(b => `<div>${b.icon} ${b.name}</div>`).join('')}
-                </div>
-            ` : ''}
-        </div>
-        
-        <div style="display: flex; gap: 12px; margin: 24px 0;">
-            <button class="btn btn-secondary" style="flex: 1;" onclick="markAsCompleted('${chapterKey}')">
-                ${STATE.progress[chapterKey].completed ? '✓ Completed' : 'Mark Complete'}
-            </button>
-            <button class="btn btn-primary" style="flex: 1;" onclick="retryQuiz()">
-                🔄 Retry Quiz
-            </button>
-        </div>
-        
-        <h3 style="margin: 32px 0 16px; font-size: 20px;">Review Questions</h3>
-        
-        ${questions.map((q, idx) => {
-            const userAnswer = answers[idx];
-            const isCorrect = userAnswer === q.correct;
-            const isSkipped = userAnswer === undefined;
-            const isBookmarked = STATE.bookmarks.some(b => b.id === q.id);
+                    <div style="margin-top: 24px; padding: 16px; background: rgba(255,255,255,0.2); border-radius: 12px;">
+                        <div style="font-weight: 600; margin-bottom: 12px;">🎉 New Badges Earned!</div>
+                        ${newBadges.map(b => `<div>${b.icon} ${b.name}</div>`).join('')}
+                    </div>
+                ` : ''}
+            </div>
             
-            return `
-                <div class="card question-review ${idx === 0 ? 'expanded' : ''}" id="review-${idx}">
-                    <div class="question-review-header" onclick="toggleReview(${idx})">
-                        <div>
-                            <strong>Question ${idx + 1}</strong>
-                            ${isSkipped ? ' ⊝ Skipped' : isCorrect ? ' ✓' : ' ✗'}
+            <div style="display: flex; gap: 12px; margin: 24px 0;">
+                <button class="btn btn-secondary" style="flex: 1;" onclick="markAsCompleted('${chapterKey}')">
+                    ${progress.completed ? '✓ Completed' : 'Mark Complete'}
+                </button>
+                <button class="btn btn-primary" style="flex: 1;" onclick="retryQuiz()">
+                    🔄 Retry Quiz
+                </button>
+            </div>
+            
+            <h3 style="margin: 32px 0 16px; font-size: 20px;">Review Questions</h3>
+            
+            ${questions.map((q, idx) => {
+                const userAnswer = answers[idx];
+                const isCorrect = userAnswer === q.correct;
+                const isSkipped = userAnswer === undefined;
+                const isBookmarked = STATE.bookmarks.some(b => b.id === q.id);
+                
+                return `
+                    <div class="card question-review ${idx === 0 ? 'expanded' : ''}" id="review-${idx}">
+                        <div class="question-review-header" onclick="toggleReview(${idx})">
+                            <div>
+                                <strong>Question ${idx + 1}</strong>
+                                ${isSkipped ? ' ⊝ Skipped' : isCorrect ? ' ✓' : ' ✗'}
+                            </div>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <button class="btn btn-icon" onclick="event.stopPropagation(); toggleBookmarkFromReport('${q.id}', '${type}', '${subject}', ${chapterIdx})" style="font-size: 20px;">
+                                    ${isBookmarked ? '🔖' : '📑'}
+                                </button>
+                                <span>▼</span>
+                            </div>
                         </div>
-                        <div style="display: flex; gap: 8px; align-items: center;">
-                          <button class="btn btn-icon" onclick="event.stopPropagation(); toggleBookmarkFromReport('${q.id}', '${type}', '${subject}', ${chapterIdx})" style="font-size: 20px;">
-                                ${isBookmarked ? '🔖' : '📑'}
-                            </button>
-                            <span>▼</span>
-                        </div>
-                    </div>
-                    <div class="question-review-content">
-                        <p style="font-weight: 600; margin-bottom: 16px;">${q.question}</p>
-                        
-                        ${q.options.map((opt, optIdx) => {
-                            let className = 'answer-row';
-                            if (optIdx === q.correct) className += ' correct';
-                            else if (optIdx === userAnswer && !isCorrect) className += ' incorrect';
+                        <div class="question-review-content">
+                            <p style="font-weight: 600; margin-bottom: 16px;">${q.question}</p>
                             
-                            return `
-                                <div class="${className}">
-                                    ${String.fromCharCode(65 + optIdx)}. ${opt}
-                                    ${optIdx === q.correct ? ' ✓ Correct Answer' : ''}
-                                    ${optIdx === userAnswer && !isCorrect ? ' ✗ Your Answer' : ''}
-                                    ${optIdx === userAnswer && isCorrect ? ' ✓ Your Answer' : ''}
-                                </div>
-                            `;
-                        }).join('')}
-                        
-                        ${isSkipped ? '<div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; margin: 8px 0; color: var(--text-secondary);">You skipped this question</div>' : ''}
-                        
-                        <div class="explanation">
-                            <strong>Explanation:</strong> ${q.explanation}
+                            ${q.options.map((opt, optIdx) => {
+                                let className = 'answer-row';
+                                if (optIdx === q.correct) className += ' correct';
+                                else if (optIdx === userAnswer && !isCorrect) className += ' incorrect';
+                                
+                                return `
+                                    <div class="${className}">
+                                        ${String.fromCharCode(65 + optIdx)}. ${opt}
+                                        ${optIdx === q.correct ? ' ✓ Correct Answer' : ''}
+                                        ${optIdx === userAnswer && !isCorrect ? ' ✗ Your Answer' : ''}
+                                        ${optIdx === userAnswer && isCorrect ? ' ✓ Your Answer' : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                            
+                            ${isSkipped ? '<div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; margin: 8px 0; color: var(--text-secondary);">You skipped this question</div>' : ''}
+                            
+                            <div class="explanation">
+                                <strong>Explanation:</strong> ${q.explanation}
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
-        }).join('')}
-    </div>
-`;
+                `;
+            }).join('')}
+        </div>
+    `;
 }
 function toggleReview(idx) {
 const element = document.getElementById(`review-${idx}`);
