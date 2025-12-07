@@ -227,12 +227,6 @@ function render() {
         case 'subjects':
             content = renderSubjects();
             break;
-        case 'chapters':
-            content = renderChapters();
-            break;
-        case 'sets':
-            content = renderSets();
-            break;
         case 'quiz':
             content = renderQuiz();
             break;
@@ -456,71 +450,37 @@ function renderSubjects() {
         <div class="container">
             <h3 style="margin: 24px 0 16px; font-size: 20px;">Select a Chapter</h3>
             
-            ${subjectData.chapters.map((chapter, chIdx) => `
-                <div class="card chapter-card" onclick="navigate('chapters', {type: '${type}', subject: '${subject}', chapterIdx: ${chIdx}})">
-                    <div class="card-header">
-                        <div>
-                            <div class="card-title">📖 ${chapter.name}</div>
-                            <p style="font-size: 14px; color: var(--text-secondary); margin-top: 4px;">
-                                ${chapter.sets.length} sets available
-                            </p>
-                        </div>
-                        <div class="badge">${chIdx + 1}</div>
-                    </div>
-                </div>
-            `).join('')}
-        </div>
-    `;
-}
-
-function renderChapters() {
-    const { type, subject, chapterIdx } = STATE.currentQuiz;
-    const chapter = QUIZ_DATA[type][subject].chapters[chapterIdx];
-    
-    return `
-        <div class="header">
-            <button class="btn btn-icon" onclick="navigate('subjects', {type: '${type}', subject: '${subject}'})" aria-label="Back">
-                ← Back
-            </button>
-            <div class="app-name">${chapter.name}</div>
-            <button class="btn btn-icon" onclick="toggleTheme()" aria-label="Toggle theme">
-                ${STATE.user.theme === 'light' ? '🌙' : '☀️'}
-            </button>
-        </div>
-        
-        <div class="container">
-            <h3 style="margin: 24px 0 16px; font-size: 20px;">Select a Quiz Set</h3>
-            
-            ${chapter.sets.map((set, setIdx) => {
-                const setKey = `${type}_${subject}_${chapterIdx}_${setIdx}`;
-                const progress = STATE.progress[setKey] || { attempts: 0, bestScore: 0, completed: false };
+            ${subjectData.chapters.map((chapter, chIdx) => {
+                const chapterKey = `${type}_${subject}_${chIdx}`;
+                const progress = STATE.progress[chapterKey] || { attempts: 0, bestScore: 0, completed: false };
                 
-               return `
-    <div class="card set-card" onclick="navigate('sets', {type: '${type}', subject: '${subject}', chapterIdx: ${chapterIdx}, setIdx: ${setIdx}})">
-        <div class="card-header">
-            <div>
-                <div class="card-title">📝 Set ${setIdx + 1}</div>
-                <div class="set-progress">
-                    Attempts: ${progress.attempts} | Best Score: ${progress.bestScore}/5
-                    ${progress.completed ? ' ✓ Completed' : ''}
-                </div>
-            </div>
-            <div>
-                ${progress.bestScore === 5 ? '🏅' : progress.bestScore >= 3 ? '⭐' : ''}
-            </div>
-        </div>
-        <div style="display: flex; gap: 8px; margin-top: 12px;">
-            <button class="btn btn-primary" style="flex: 1;" onclick="event.stopPropagation(); startQuiz('${type}', '${subject}', ${chapterIdx}, ${setIdx})">
-                ${progress.attempts > 0 ? 'Play Again' : 'Start Quiz'}
-            </button>
-            ${progress.attempts > 0 ? `
-                <button class="btn btn-secondary" onclick="event.stopPropagation(); viewLastAttempt('${type}', '${subject}', ${chapterIdx}, ${setIdx})">
-                    👁️ View Solutions
-                </button>
-            ` : ''}
-        </div>
-    </div>
-`;
+                return `
+                    <div class="card chapter-card" onclick="navigate('chapters', {type: '${type}', subject: '${subject}', chapterIdx: ${chIdx}})">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">📖 ${chapter.name}</div>
+                                <p style="font-size: 14px; color: var(--text-secondary); margin-top: 4px;">
+                                    ${chapter.questions.length} questions
+                                </p>
+                                <div class="set-progress" style="margin-top: 8px;">
+                                    Attempts: ${progress.attempts} | Best Score: ${progress.bestScore}/${chapter.questions.length}
+                                    ${progress.completed ? ' ✓ Completed' : ''}
+                                </div>
+                            </div>
+                            <div class="badge">${chIdx + 1}</div>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            <button class="btn btn-primary" style="flex: 1;" onclick="event.stopPropagation(); startQuiz('${type}', '${subject}', ${chIdx})">
+                                ${progress.attempts > 0 ? 'Play Again' : 'Start Quiz'}
+                            </button>
+                            ${progress.attempts > 0 ? `
+                                <button class="btn btn-secondary" onclick="event.stopPropagation(); viewLastAttempt('${type}', '${subject}', ${chIdx})">
+                                    👁️ View Solutions
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
             }).join('')}
         </div>
     `;
@@ -531,14 +491,13 @@ function renderSets() {
     return '';
 }
 
-function startQuiz(type, subject, chapterIdx, setIdx) {
-    const questions = QUIZ_DATA[type][subject].chapters[chapterIdx].sets[setIdx].questions;
+function startQuiz(type, subject, chapterIdx) {
+    const questions = QUIZ_DATA[type][subject].chapters[chapterIdx].questions;
     
     STATE.quizState = {
         type,
         subject,
         chapterIdx,
-        setIdx,
         questions,
         currentQuestion: 0,
         answers: [],
@@ -687,7 +646,7 @@ function previousQuestion() {
 function toggleBookmark() {
     if (!STATE.quizState) return;
     
-    const { questions, currentQuestion, type, subject, chapterIdx, setIdx } = STATE.quizState;
+    const { questions, currentQuestion, type, subject, chapterIdx } = STATE.quizState;
     const question = questions[currentQuestion];
     
     const bookmarkIdx = STATE.bookmarks.findIndex(b => b.id === question.id);
@@ -697,7 +656,7 @@ function toggleBookmark() {
     } else {
         STATE.bookmarks.push({
             ...question,
-            source: `${type} > ${subject} > Ch${chapterIdx + 1} > Set${setIdx + 1}`
+            source: `${type} > ${subject} > ${QUIZ_DATA[type][subject].chapters[chapterIdx].name}`
         });
     }
     
@@ -705,7 +664,7 @@ function toggleBookmark() {
     playSound('click');
     render();
 }
-function toggleBookmarkFromReport(questionId, type, subject, chapterIdx, setIdx) {
+function toggleBookmarkFromReport(questionId, type, subject, chapterIdx) {
     if (!STATE.quizState) return;
     
     const question = STATE.quizState.questions.find(q => q.id === questionId);
@@ -718,7 +677,7 @@ function toggleBookmarkFromReport(questionId, type, subject, chapterIdx, setIdx)
     } else {
         STATE.bookmarks.push({
             ...question,
-            source: `${type} > ${subject} > Ch${chapterIdx + 1} > Set${setIdx + 1}`
+            source: `${type} > ${subject} > ${QUIZ_DATA[type][subject].chapters[chapterIdx].name}`
         });
     }
     
@@ -726,7 +685,6 @@ function toggleBookmarkFromReport(questionId, type, subject, chapterIdx, setIdx)
     playSound('click');
     render();
 }
-
 function toggleSound() {
     STATE.user.soundEnabled = !STATE.user.soundEnabled;
     saveState();
@@ -743,16 +701,16 @@ function toggleFullscreen() {
 
 function exitQuiz() {
     if (confirm('Are you sure you want to exit? Your progress will be lost.')) {
-        const { type, subject, chapterIdx } = STATE.quizState;
+        const { type, subject } = STATE.quizState;
         STATE.quizState = null;
-        navigate('chapters', { type, subject, chapterIdx });
+        navigate('subjects', { type, subject });
     }
 }
 
 function submitQuiz() {
     if (!STATE.quizState) return;
     
-    const { type, subject, chapterIdx, setIdx, questions, answers, startTime, questionTimes } = STATE.quizState;
+    const { type, subject, chapterIdx, questions, answers, startTime, questionTimes } = STATE.quizState;
     
     const totalTime = Date.now() - startTime;
     let correctCount = 0;
@@ -763,8 +721,8 @@ function submitQuiz() {
         }
     });
     
-    const setKey = `${type}_${subject}_${chapterIdx}_${setIdx}`;
-    const progress = STATE.progress[setKey] || { attempts: 0, bestScore: 0, completed: false, bestTime: Infinity };
+    const chapterKey = `${type}_${subject}_${chapterIdx}`;
+    const progress = STATE.progress[chapterKey] || { attempts: 0, bestScore: 0, completed: false, bestTime: Infinity };
     
     progress.attempts++;
     if (correctCount > progress.bestScore) {
@@ -774,7 +732,7 @@ function submitQuiz() {
         progress.bestTime = totalTime;
     }
     
-    STATE.progress[setKey] = progress;
+    STATE.progress[chapterKey] = progress;
     
     // Calculate rewards
     const pointsEarned = correctCount * 10;
@@ -783,14 +741,14 @@ function submitQuiz() {
     
     // Time bonus (if completed under 5 minutes)
     const targetTime = 5 * 60 * 1000;
-    if (totalTime < targetTime && correctCount === 5) {
+    if (totalTime < targetTime && correctCount === questions.length) {
         coinsEarned += 5;
     }
     
-    // XP for completed set
-    if (correctCount === 5) {
-        xpEarned = 30;
-    } else if (correctCount >= 3) {
+    // XP for completed chapter
+    if (correctCount === questions.length) {
+        xpEarned = 30; // Extra XP for perfect score
+    } else if (correctCount >= Math.ceil(questions.length * 0.6)) {
         xpEarned = 15;
     }
     
@@ -806,7 +764,6 @@ function submitQuiz() {
     STATE.user.xp += xpEarned;
     
     // Update daily/weekly/monthly points
-    const now = new Date();
     STATE.user.dailyPoints = (STATE.user.dailyPoints || 0) + pointsEarned;
     STATE.user.weeklyPoints = (STATE.user.weeklyPoints || 0) + pointsEarned;
     STATE.user.monthlyPoints = (STATE.user.monthlyPoints || 0) + pointsEarned;
@@ -829,11 +786,10 @@ function submitQuiz() {
     
     // Save last attempt to Firebase
     if (typeof saveLastAttempt === 'function') {
-        saveLastAttempt(setKey, {
+        saveLastAttempt(chapterKey, {
             type,
             subject,
             chapterIdx,
-            setIdx,
             questions,
             answers,
             results: STATE.quizState.results,
@@ -843,7 +799,7 @@ function submitQuiz() {
     
     saveState();
     
-    if (correctCount === 5) {
+    if (correctCount === questions.length) {
         triggerConfetti();
     }
     
@@ -869,7 +825,7 @@ function renderReport() {
     
     return `
         <div class="header">
-            <button class="btn btn-icon" onclick="navigate('chapters', {type: '${type}', subject: '${subject}', chapterIdx: ${chapterIdx}})" aria-label="Back">
+           <button class="btn btn-icon" onclick="navigate('subjects', {type: '${type}', subject: '${subject}'})" aria-label="Back">
                 ← Back
             </button>
             <div class="app-name">Quiz Results</div>
@@ -950,7 +906,7 @@ function renderReport() {
                             ${isSkipped ? ' ⊝ Skipped' : isCorrect ? ' ✓' : ' ✗'}
                         </div>
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            <button class="btn btn-icon" onclick="event.stopPropagation(); toggleBookmarkFromReport('${q.id}', '${type}', '${subject}', ${chapterIdx}, ${setIdx})" style="font-size: 20px;">
+                          <button class="btn btn-icon" onclick="event.stopPropagation(); toggleBookmarkFromReport('${q.id}', '${type}', '${subject}', ${chapterIdx})" style="font-size: 20px;">
                                 ${isBookmarked ? '🔖' : '📑'}
                             </button>
                             <span>▼</span>
@@ -992,15 +948,15 @@ if (element) {
 element.classList.toggle('expanded');
 }
 }
-function markAsCompleted(setKey) {
-STATE.progress[setKey].completed = !STATE.progress[setKey].completed;
-saveState();
-playSound('click');
-render();
+function markAsCompleted(chapterKey) {
+    STATE.progress[chapterKey].completed = !STATE.progress[chapterKey].completed;
+    saveState();
+    playSound('click');
+    render();
 }
 function retryQuiz() {
-const { type, subject, chapterIdx, setIdx } = STATE.quizState;
-startQuiz(type, subject, chapterIdx, setIdx);
+    const { type, subject, chapterIdx } = STATE.quizState;
+    startQuiz(type, subject, chapterIdx);
 }
 function renderProfile() {
 const xpForNext = getXPForNextLevel(STATE.user.level);
@@ -1210,20 +1166,20 @@ loadState();
 render();
 });
 
-async function viewLastAttempt(type, subject, chapterIdx, setIdx) {
-    const setKey = `${type}_${subject}_${chapterIdx}_${setIdx}`;
+async function viewLastAttempt(type, subject, chapterIdx) {
+    const chapterKey = `${type}_${subject}_${chapterIdx}`;
     
     if (typeof loadLastAttempt === 'function') {
-        const lastAttempt = await loadLastAttempt(setKey);
+        const lastAttempt = await loadLastAttempt(chapterKey);
         
         if (lastAttempt) {
             STATE.quizState = {
                 ...lastAttempt,
-                viewOnly: true  // Flag to indicate view-only mode
+                viewOnly: true
             };
             navigate('report');
         } else {
-            alert('No previous attempt found for this quiz.');
+            alert('No previous attempt found for this chapter.');
         }
     } else {
         alert('Firebase not initialized. Cannot load last attempt.');
