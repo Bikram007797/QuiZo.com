@@ -14,6 +14,7 @@ let currentUser = null;
 
 // Make currentUser accessible globally
 window.currentUser = null;
+
 async function initFirebase() {
     try {
         // Import Firebase modules
@@ -146,7 +147,12 @@ async function fetchLeaderboard(type = 'total') {
         
         const leaderboard = [];
         snapshot.forEach((doc) => {
-            leaderboard.push({ id: doc.id, ...doc.data() });
+            const data = doc.data();
+            leaderboard.push({ 
+                id: doc.id, 
+                ...data,
+                completed: true // Add this to fix the second error
+            });
         });
         
         return leaderboard;
@@ -166,7 +172,8 @@ async function saveLastAttempt(setKey, quizData) {
         const attemptRef = doc(db, 'users', currentUser.uid, 'lastAttempts', setKey);
         await setDoc(attemptRef, {
             ...quizData,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            completed: true // Add this to fix the second error
         });
     } catch (error) {
         console.error('Error saving last attempt:', error);
@@ -184,7 +191,11 @@ async function loadLastAttempt(setKey) {
         const attemptDoc = await getDoc(attemptRef);
         
         if (attemptDoc.exists()) {
-            return attemptDoc.data();
+            const data = attemptDoc.data();
+            return {
+                ...data,
+                completed: data.completed || true // Ensure completed property exists
+            };
         }
         return null;
     } catch (error) {
@@ -192,3 +203,30 @@ async function loadLastAttempt(setKey) {
         return null;
     }
 }
+
+// Export all functions
+export {
+    initFirebase,
+    saveUserDataToFirebase,
+    loadUserDataFromFirebase,
+    updateLeaderboard,
+    fetchLeaderboard, // This was missing export
+    saveLastAttempt,
+    loadLastAttempt,
+    getWeekNumber,
+    // Export variables if needed elsewhere
+    auth,
+    db,
+    currentUser
+};
+
+// Also attach to window for global access (optional, but helps with debugging)
+window.firebaseFunctions = {
+    initFirebase,
+    saveUserDataToFirebase,
+    loadUserDataFromFirebase,
+    updateLeaderboard,
+    fetchLeaderboard,
+    saveLastAttempt,
+    loadLastAttempt
+};
