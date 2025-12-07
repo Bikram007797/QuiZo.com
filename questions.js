@@ -3,45 +3,186 @@ const QUIZ_DATA = {
         GEOGRAPHY: {
             chapters: [
                 {
-                    name: "Solar System",
-                    questions: [
-                        {
-                            id: "geo_d_c1_q1",
-                            question: "Which planet is known as the Red Planet?",
-                            options: ["Venus", "Mars", "Jupiter", "Saturn"],
-                            correct: 1,
-                            explanation: "Mars is called the Red Planet due to iron oxide (rust) on its surface, giving it a reddish appearance."
-                        },
-                        {
-                            id: "geo_d_c1_q2",
-                            question: "What is the largest planet in our Solar System?",
-                            options: ["Saturn", "Neptune", "Jupiter", "Uranus"],
-                            correct: 2,
-                            explanation: "Jupiter is the largest planet with a diameter of about 143,000 kilometers."
-                        },
-                        {
-                            id: "geo_d_c1_q3",
-                            question: "How many planets are there in our Solar System?",
-                            options: ["7", "8", "9", "10"],
-                            correct: 1,
-                            explanation: "There are 8 planets: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, and Neptune. Pluto was reclassified as a dwarf planet in 2006."
-                        },
-                        {
-                            id: "geo_d_c1_q4",
-                            question: "Which planet is closest to the Sun?",
-                            options: ["Venus", "Mercury", "Earth", "Mars"],
-                            correct: 1,
-                            explanation: "Mercury is the closest planet to the Sun, orbiting at an average distance of 58 million kilometers."
-                        },
-                        {
-                            id: "geo_d_c1_q5",
-                            question: "What is the name of Earth's natural satellite?",
-                            options: ["Titan", "Europa", "Moon", "Phobos"],
-                            correct: 2,
-                            explanation: "The Moon is Earth's only natural satellite, orbiting at an average distance of 384,400 km."
-                        }
-                    ]
-                },
+                   {
+    name: "Solar System",
+    questions: [
+        {
+            id: "geo_d_c1_q1",
+            question: "The Nebular Hypothesis of solar system formation was first proposed by:",
+            options: ["Fred Hoyle", "Immanuel Kant", "Copernicus", "Chamberlin and Moulton"],
+            correct: 1,
+            explanation: "Proposed in 1755, later modified by Laplace in 1796. Explains the solar system formed from a rotating cloud of gas and dust."
+        },
+        {
+            id: "geo_d_c1_q2",
+            question: "Which of the following is/are luminous celestial bodies? 1. Stars 2. Planets 3. Galaxies",
+            options: ["1 only", "1 and 3 only", "2 and 3 only", "1, 2 and 3"],
+            correct: 1,
+            explanation: "Stars emit light, galaxies are clusters of luminous stars. Planets only reflect sunlight → non-luminous."
+        },
+        {
+            id: "geo_d_c1_q3",
+            question: "Consider the following statements about Venus: 1. It rotates clockwise. 2. Its rotation is slower than its revolution. 3. It is the brightest planet.",
+            options: ["1 and 2 only", "2 and 3 only", "1 and 3 only", "1, 2 and 3"],
+            correct: 3,
+            explanation: "Venus has retrograde (clockwise) rotation, one rotation takes 243 Earth days > revolution (225 days). Brightest due to thick clouds reflecting sunlight."
+        },
+        {
+            id: "geo_d_c1_q4",
+            question: "Which one of the following planets has the largest number of moons?",
+            options: ["Jupiter", "Saturn", "Uranus", "Neptune"],
+            correct: 1,
+            explanation: "Saturn has the highest number of moons (latest data), the highest in the solar system."
+        },
+        {
+            id: "geo_d_c1_q5",
+            question: "Which planet has the longest revolution period?",
+            options: ["Jupiter", "Uranus", "Neptune", "Pluto"],
+            correct: 2,
+            explanation: "Neptune takes 165 Earth years to complete one revolution around the Sun. (Pluto is a dwarf planet, not a main planet)."
+        },
+        {
+            id: "geo_d_c1_q6",
+            question: "Arrange the following correctly according to distance from the Sun: Mercury, Uranus, Earth, Neptune",
+            options: ["Mercury – Earth – Uranus – Neptune", "Mercury – Neptune – Earth – Uranus", "Earth – Mercury – Uranus – Neptune", "Mercury – Uranus – Neptune – Earth"],
+            correct: 0,
+            explanation: "Order of planets: Mercury (1st) → Earth (3rd) → Uranus (7th) → Neptune (8th)."
+        },
+        {
+            id: "geo_d_c1_q7",
+            question: "The Kuiper Belt is mainly associated with:",
+            options: ["Origin of stars", "Dwarf planets like Pluto", "Asteroid distribution", "Formation of satellites"],
+            correct: 1,
+            explanation: "Kuiper Belt beyond Neptune contains icy objects & dwarf planets (Pluto, Haumea, Makemake, Eris)."
+        },
+        {
+            id: "geo_d_c1_q8",
+            question: "Which of the following statements is correct about the Moon?",
+            options: ["It rotates and revolves at different speeds", "Its gravity is equal to Earth's", "One side always faces Earth due to synchronous rotation", "Light from the Moon takes 8 minutes to reach Earth"],
+            correct: 2,
+            explanation: "Moon's rotation time = revolution time (27.3 days), so only one side is visible from Earth."
+        },
+        {
+            id: "geo_d_c1_q9",
+            question: "Match the following pairs correctly: 1. Callisto – (A) Mars, 2. Deimos– (B) Jupiter, 3. Titan – (C) Saturn, 4. Triton – (D) Neptune",
+            options: ["1-A, 2-B, 3-C, 4-D", "1-B, 2-A, 3-C, 4-D", "1-A, 2-C, 3-D, 4-B", "1-D, 2-C, 3-B, 4-A"],
+            correct: 1,
+            explanation: "Deimos = Mars; Callisto = Jupiter; Titan = Saturn's largest moon; Triton = Neptune's largest moon."
+        },
+        {
+            id: "geo_d_c1_q10",
+            question: "Aditya-L1 mission of ISRO is related to:",
+            options: ["Studying the Moon's surface", "Observing Mars atmosphere", "Solar observatory at Lagrange Point", "Exploration of asteroid belt"],
+            correct: 2,
+            explanation: "India's first solar mission placed at L1 point to study solar atmosphere & radiation."
+        },
+        {
+            id: "geo_d_c1_q11",
+            question: "Consider the following statements about Jupiter: 1. Jupiter has the longest rotational period among the planets. 2. The Great Red Spot is a persistent anticyclonic storm on Jupiter. 3. Ganymede is the largest satellite in the Solar System. Which statements are correct?",
+            options: ["1 and 3 only", "1 and 2 only", "2 and 3 only", "1, 2 and 3"],
+            correct: 2,
+            explanation: "Statement 1 is false — Jupiter has the shortest rotation (~9.9 hours). Statements 2 and 3 are true: Great Red Spot is a long-lived storm, and Ganymede is the largest moon."
+        },
+        {
+            id: "geo_d_c1_q12",
+            question: "Consider the following statements about Saturn: 1. Saturn's mean density is less than water. 2. Saturn's rings were observed in the 17th century. 3. Cassini discovered a gap in Saturn's rings. Which statements are correct?",
+            options: ["1 and 3 only", "1 and 2 only", "2 and 3 only", "1, 2 and 3"],
+            correct: 3,
+            explanation: "All are true. Saturn's low density (<1 g/cm³), rings observed by Galileo/Huygens (1655), and Cassini discovered the gap (1675)."
+        },
+        {
+            id: "geo_d_c1_q13",
+            question: "Consider the following statements about Uranus: 1. Uranus appears greenish due to methane absorbing red light. 2. Uranus has the warmest surface temperature. 3. William Herschel discovered Uranus in 1781. Which statements are correct?",
+            options: ["1 and 3 only", "1 and 2 only", "2 and 3 only", "1, 2 and 3"],
+            correct: 0,
+            explanation: "Statements 1 and 3 are true — methane gives Uranus its blue-green hue and Herschel discovered it. Statement 2 is false — Uranus is quite cold."
+        },
+        {
+            id: "geo_d_c1_q14",
+            question: "Consider the following statements about Neptune: 1. Neptune's existence was predicted mathematically before observation. 2. Triton has a retrograde orbit. 3. Neptune is the innermost ice giant. Which statements are correct?",
+            options: ["1 and 3 only", "1 and 2 only", "2 and 3 only", "1, 2 and 3"],
+            correct: 1,
+            explanation: "Statement 1 true — predicted by Le Verrier/Adams. Triton orbits retrograde (statement 2 true). Statement 3 false — Neptune is the outermost major planet."
+        },
+        {
+            id: "geo_d_c1_q15",
+            question: "Assertion: In 2006 the IAU reclassified Pluto as a 'dwarf planet.' Reason: Pluto's orbit lies within the main asteroid belt.",
+            options: ["Both A and R are true, and R explains A", "Both A and R are true, but R doesn't explain A", "A is true but R is false", "Both A and R are false"],
+            correct: 2,
+            explanation: "Assertion is true — IAU redefined 'planet' in 2006. Reason is false — Pluto is a Kuiper Belt Object, not in the asteroid belt."
+        },
+        {
+            id: "geo_d_c1_q16",
+            question: "Consider the following statements about Pluto: 1. Pluto's orbital period is approximately 248 Earth years. 2. Pluto is in the Kuiper Belt. 3. Charon is Pluto's largest satellite. Which statements are correct?",
+            options: ["1 and 3 only", "1 and 2 only", "2 and 3 only", "1, 2 and 3"],
+            correct: 3,
+            explanation: "All three are true. Pluto's orbit takes ~248 years, it's in the Kuiper Belt beyond Neptune, and Charon is its largest moon."
+        },
+        {
+            id: "geo_d_c1_q17",
+            question: "Consider statements: 1. Stars produce light via nuclear fusion. 2. Fireflies glow by reflecting sunlight. 3. Asteroids shine by reflecting sunlight. Which are correct?",
+            options: ["1 and 3 only", "1 and 2 only", "2 and 3 only", "1, 2 and 3"],
+            correct: 0,
+            explanation: "Statement 1 true — stellar light from fusion. Statement 2 false — fireflies produce light chemically (bioluminescence), not by reflection. Statement 3 true."
+        },
+        {
+            id: "geo_d_c1_q18",
+            question: "Consider statements about comets: 1. Comets have a 'dirty snowball' composition. 2. Halley's Comet has a ~76 year period. 3. Comet tails point toward the Sun. Which are correct?",
+            options: ["1 and 3 only", "1 and 2 only", "2 and 3 only", "1, 2 and 3"],
+            correct: 1,
+            explanation: "Statements 1 and 2 are true. Statement 3 false — comet tails are pushed away from the Sun by solar wind, not toward it."
+        },
+        {
+            id: "geo_d_c1_q19",
+            question: "Consider statements: 1. All asteroids are beyond Neptune. 2. A meteoroid becomes a meteor in Earth's atmosphere. 3. Main asteroid belt is between Mars and Jupiter. Which are correct?",
+            options: ["1 and 3 only", "1 and 2 only", "2 and 3 only", "1, 2 and 3"],
+            correct: 2,
+            explanation: "Statement 1 false — many asteroids are in the main belt between Mars and Jupiter. Statements 2 and 3 are correct."
+        },
+        {
+            id: "geo_d_c1_q20",
+            question: "Assertion: Neptune has the shortest orbital period among planets. Reason: Neptune is closest to the Sun.",
+            options: ["Both A and R true, R explains A", "Both true, R doesn't explain A", "A true but R false", "Both false"],
+            correct: 3,
+            explanation: "Both false. Neptune is the farthest planet with a very long orbital period (~165 years), not the shortest."
+        },
+        {
+            id: "geo_d_c1_q21",
+            question: "Match planets with features: A. Mercury B. Venus C. Mars D. Jupiter with 1. Olympus Mons 2. Hottest planet 3. Smallest planet 4. Great Red Spot",
+            options: ["A-3, B-2, C-1, D-4", "A-2, B-3, C-4, D-1", "A-1, B-4, C-2, D-3", "A-4, B-1, C-3, D-2"],
+            correct: 0,
+            explanation: "Mercury = smallest; Venus = hottest; Mars = Olympus Mons (largest volcano); Jupiter = Great Red Spot (giant storm)."
+        },
+        {
+            id: "geo_d_c1_q22",
+            question: "Which statement about comets is correct?",
+            options: ["Tails directed toward the Sun", "Tails directed away from the Sun", "They have no tails", "Tails parallel to orbits"],
+            correct: 1,
+            explanation: "Comet tails are formed by solar wind and radiation pressure, always pointing away from the Sun."
+        },
+        {
+            id: "geo_d_c1_q23",
+            question: "Consider statements about the Sun: 1. ~99% of Solar System mass is in the Sun. 2. Sun is primarily hydrogen and helium. 3. Photons take thousands to millions of years to reach photosphere. Which are correct?",
+            options: ["1 and 3 only", "1 and 2 only", "2 and 3 only", "1, 2 and 3"],
+            correct: 3,
+            explanation: "All three correct. Sun holds most Solar System mass, is mainly H (~73%) and He (~25%), and photons diffuse outward over long timescales."
+        },
+        {
+            id: "geo_d_c1_q24",
+            question: "Consider statements about Jupiter: 1. Jupiter has no ring system. 2. Galileo discovered four Galilean satellites. 3. Ganymede is the largest moon. Which are correct?",
+            options: ["1 and 3 only", "1 and 2 only", "2 and 3 only", "1, 2 and 3"],
+            correct: 2,
+            explanation: "Statement 1 false — Jupiter has a faint ring system. Statements 2 and 3 true — Galileo observed four moons, Ganymede is largest."
+        },
+        {
+            id: "geo_d_c1_q25",
+            question: "Which statement is correct?",
+            options: ["Saturn's density is similar to Earth", "Earth and Venus are almost similar in size", "Jupiter and Mars are similar in size", "Mars is the warmest planet"],
+            correct: 1,
+            explanation: "Earth and Venus are twin planets with similar radius, mass and composition. Venus is slightly smaller than Earth."
+        }
+    ]
+},
                 {
                     name: "Latitude and Longitude",
                     questions: [
