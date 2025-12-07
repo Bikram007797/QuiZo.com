@@ -17,30 +17,47 @@ window.currentUser = null;
 
 async function initFirebase() {
     try {
+        console.log('🔥 Starting Firebase initialization...');
+        
         // Import Firebase modules
+        console.log('📦 Loading Firebase modules...');
         const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js');
         const { getAuth, signInAnonymously, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
         const { getFirestore, doc, setDoc, getDoc, collection, query, orderBy, limit, getDocs, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
         
+        console.log('✅ Firebase modules loaded successfully');
+        
         // Initialize Firebase
+        console.log('🚀 Initializing Firebase app...');
         const app = initializeApp(firebaseConfig);
         auth = getAuth(app);
         db = getFirestore(app);
         
+        console.log('✅ Firebase app initialized');
+        console.log('🔑 Project ID:', firebaseConfig.projectId);
+        
         // Auto sign-in anonymously
+        console.log('👤 Setting up authentication...');
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                window.currentUser = user; // ✅ Add this line
+                window.currentUser = user;
+                console.log('✅ User authenticated successfully');
+                console.log('🆔 User ID:', user.uid);
                 await loadUserDataFromFirebase();
             } else {
+                console.log('🔐 No user found, signing in anonymously...');
                 await signInAnonymously(auth);
             }
         });
         
+        console.log('🎉 Firebase initialization complete!');
         return { auth, db };
     } catch (error) {
-        console.error('Firebase initialization error:', error);
+        console.error('❌ Firebase initialization FAILED!');
+        console.error('📛 Error details:', error.message);
+        console.error('🔍 Full error:', error);
+        alert('⚠️ Firebase connection failed. Some features may not work.\n\nError: ' + error.message);
         return null;
     }
 }
@@ -130,9 +147,15 @@ function getWeekNumber(date) {
 
 // Fetch leaderboard data
 async function fetchLeaderboard(type = 'total') {
-    if (!db) return [];
+    if (!db) {
+        console.error('❌ Cannot fetch leaderboard: Database not initialized');
+        return [];
+    }
     
     try {
+        console.log('📊 Fetching leaderboard data...');
+        console.log('📈 Type:', type);
+        
         const { collection, query, orderBy, limit, getDocs } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
         
         const leaderboardRef = collection(db, 'leaderboard');
@@ -142,68 +165,115 @@ async function fetchLeaderboard(type = 'total') {
         else if (type === 'weekly') sortField = 'weeklyPoints';
         else if (type === 'monthly') sortField = 'monthlyPoints';
         
+        console.log('🔢 Sorting by field:', sortField);
+        
         const q = query(leaderboardRef, orderBy(sortField, 'desc'), limit(100));
         const snapshot = await getDocs(q);
+        
+        console.log('📦 Documents fetched:', snapshot.size);
         
         const leaderboard = [];
         snapshot.forEach((doc) => {
             const data = doc.data();
             leaderboard.push({ 
                 id: doc.id, 
-                ...data,
-                completed: true // Add this to fix the second error
+                userId: data.userId,
+                username: data.username || 'Anonymous',
+                totalPoints: data.totalPoints || 0,
+                dailyPoints: data.dailyPoints || 0,
+                weeklyPoints: data.weeklyPoints || 0,
+                monthlyPoints: data.monthlyPoints || 0,
+                level: data.level || 1,
+                completed: true
             });
         });
         
+        console.log('✅ Leaderboard processed successfully');
+        console.log('👥 Total players:', leaderboard.length);
+        if (leaderboard.length > 0) {
+            console.log('🏆 Top player:', leaderboard[0].username, 'with', leaderboard[0][sortField], 'points');
+        }
+        
         return leaderboard;
     } catch (error) {
-        console.error('Error fetching leaderboard:', error);
+        console.error('❌ Error fetching leaderboard:', error.message);
+        console.error('🔍 Full error:', error);
         return [];
     }
 }
 
 // Save last attempt for a quiz set
 async function saveLastAttempt(setKey, quizData) {
-    if (!currentUser || !db) return;
+    if (!currentUser || !db) {
+        console.error('❌ Cannot save attempt: User or DB not initialized');
+        return;
+    }
     
     try {
+        console.log('💾 Saving quiz attempt...');
+        console.log('🔑 Chapter key:', setKey);
+        console.log('📝 Quiz data:', {
+            type: quizData.type,
+            subject: quizData.subject,
+            chapterIdx: quizData.chapterIdx,
+            questionsCount: quizData.questions?.length,
+            answersCount: quizData.answers?.length
+        });
+        
         const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
         
         const attemptRef = doc(db, 'users', currentUser.uid, 'lastAttempts', setKey);
         await setDoc(attemptRef, {
             ...quizData,
             timestamp: new Date().toISOString(),
-            completed: true // Add this to fix the second error
+            completed: true
         });
+        
+        console.log('✅ Quiz attempt saved successfully!');
     } catch (error) {
-        console.error('Error saving last attempt:', error);
+        console.error('❌ Error saving last attempt:', error.message);
+        console.error('🔍 Full error:', error);
     }
 }
 
 // Load last attempt for a quiz set
 async function loadLastAttempt(setKey) {
-    if (!currentUser || !db) return null;
+    if (!currentUser || !db) {
+        console.error('❌ Cannot load attempt: User or DB not initialized');
+        return null;
+    }
     
     try {
+        console.log('📖 Loading last attempt...');
+        console.log('🔑 Chapter key:', setKey);
+        
         const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
         
         const attemptRef = doc(db, 'users', currentUser.uid, 'lastAttempts', setKey);
         const attemptDoc = await getDoc(attemptRef);
         
         if (attemptDoc.exists()) {
+            console.log('✅ Last attempt found!');
             const data = attemptDoc.data();
+            console.log('📊 Attempt data:', {
+                timestamp: data.timestamp,
+                questionsCount: data.questions?.length,
+                correctCount: data.results?.correctCount
+            });
             return {
                 ...data,
-                completed: data.completed || true // Ensure completed property exists
+                completed: data.completed || true
             };
+        } else {
+            console.log('⚠️ No previous attempt found for this chapter');
+            return null;
         }
-        return null;
     } catch (error) {
-        console.error('Error loading last attempt:', error);
+        console.error('❌ Error loading last attempt:', error.message);
+        console.error('🔍 Full error:', error);
         return null;
     }
 }
-
 // Export all functions
 export {
     initFirebase,
