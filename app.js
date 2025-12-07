@@ -774,7 +774,7 @@ function submitQuiz() {
     // Check for badges
     const newBadges = checkBadges();
     
-    STATE.quizState.results = {
+  STATE.quizState.results = {
         correctCount,
         totalTime,
         pointsEarned,
@@ -784,20 +784,32 @@ function submitQuiz() {
         newBadges
     };
     
-    // Save last attempt to Firebase
-    if (typeof saveLastAttempt === 'function') {
-        saveLastAttempt(chapterKey, {
-            type,
-            subject,
-            chapterIdx,
-            questions,
-            answers,
-            results: STATE.quizState.results,
-            totalTime
-        });
-    }
-    
+    // Save to localStorage first
     saveState();
+    
+    // Save last attempt to Firebase with proper error handling
+    const attemptData = {
+        type,
+        subject,
+        chapterIdx,
+        questions,
+        answers,
+        results: STATE.quizState.results,
+        totalTime,
+        timestamp: new Date().toISOString()
+    };
+    
+    if (typeof window.saveLastAttempt === 'function') {
+        window.saveLastAttempt(chapterKey, attemptData)
+            .then(() => {
+                console.log('✅ Quiz attempt saved successfully');
+            })
+            .catch(err => {
+                console.error('❌ Failed to save attempt to Firebase:', err);
+            });
+    } else {
+        console.warn('⚠️ Firebase saveLastAttempt not available');
+    }
     
     if (correctCount === questions.length) {
         triggerConfetti();
@@ -1163,40 +1175,46 @@ function updateTimer() {
     }
 }
 // Initialize app
+// Change DOMContentLoaded to:
 document.addEventListener('DOMContentLoaded', () => {
-loadState();
-render();
+    loadState();
+    // Wait a bit for Firebase to initialize
+    setTimeout(() => {
+        render();
+    }, 1000);
 });
 
 async function viewLastAttempt(type, subject, chapterIdx) {
     const chapterKey = `${type}_${subject}_${chapterIdx}`;
     
-    if (typeof loadLastAttempt === 'function') {
-        const lastAttempt = await loadLastAttempt(chapterKey);
-        
-        if (lastAttempt) {
-            STATE.quizState = {
-                ...lastAttempt,
-                viewOnly: true
-            };
-            navigate('report');
+    // Show loading
+    alert('Loading solutions...');
+    
+    try {
+        if (typeof window.loadLastAttempt === 'function') {
+            const lastAttempt = await window.loadLastAttempt(chapterKey);
+            
+            if (lastAttempt) {
+                STATE.quizState = {
+                    ...lastAttempt,
+                    viewOnly: true
+                };
+                navigate('report');
+            } else {
+                alert('No previous attempt found');
+                navigate('subjects', {type, subject});
+            }
         } else {
-            alert('No previous attempt found for this chapter.');
+            alert('Firebase not initialized');
         }
-    } else {
-        alert('Firebase not initialized. Cannot load last attempt.');
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error loading solutions');
     }
 }
-
 function renderLeaderboard() {
-    // Start with loading state
-    setTimeout(async () => {
-        const leaderboardData = await fetchLeaderboard('total');
-        const content = document.getElementById('leaderboard-content');
-        if (content) {
-            content.innerHTML = renderLeaderboardList(leaderboardData);
-        }
-    }, 0);
+    // Load leaderboard data immediately
+    loadLeaderboardData('total');
     
     return `
         <div class="header">
@@ -1211,10 +1229,10 @@ function renderLeaderboard() {
         
         <div class="container">
             <div style="display: flex; gap: 8px; margin: 16px 0; flex-wrap: wrap;">
-                <button class="btn btn-secondary" onclick="switchLeaderboard('total')">🏆 All Time</button>
-                <button class="btn btn-secondary" onclick="switchLeaderboard('daily')">📅 Daily</button>
-                <button class="btn btn-secondary" onclick="switchLeaderboard('weekly')">📊 Weekly</button>
-                <button class="btn btn-secondary" onclick="switchLeaderboard('monthly')">📆 Monthly</button>
+                <button class="btn btn-secondary leaderboard-tab active" data-type="total" onclick="switchLeaderboard('total')">🏆 All Time</button>
+                <button class="btn btn-secondary leaderboard-tab" data-type="daily" onclick="switchLeaderboard('daily')">📅 Daily</button>
+                <button class="btn btn-secondary leaderboard-tab" data-type="weekly" onclick="switchLeaderboard('weekly')">📊 Weekly</button>
+                <button class="btn btn-secondary leaderboard-tab" data-type="monthly" onclick="switchLeaderboard('monthly')">📆 Monthly</button>
             </div>
             
             <div id="leaderboard-content">
@@ -1225,6 +1243,41 @@ function renderLeaderboard() {
             </div>
         </div>
     `;
+}
+async function loadLeaderboardData(type) {
+    const content = document.getElementById('leaderboard-content');
+    if (!content) return;
+    
+    // Show loading
+    content.innerHTML = `
+        <div class="card" style="text-align: center; padding: 32px;">
+            <div style="font-size: 48px; margin-bottom: 16px;">⏳</div>
+            <p style="color: var(--text-secondary);">Loading ${type} leaderboard...</p>
+        </div>
+    `;
+    
+    try {
+        const fetchFunc = window.fetchLeaderboard || window.firebaseFunctions?.fetchLeaderboard;
+        if (fetchFunc) {
+            const data = await fetchFunc(type);
+            content.innerHTML = renderLeaderboardList(data);
+        } else {
+            content.innerHTML = `
+                <div class="card" style="text-align: center; padding: 32px;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+                    <p style="color: var(--text-secondary);">Firebase not initialized. Please refresh the page.</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading leaderboard:', error);
+        content.innerHTML = `
+            <div class="card" style="text-align: center; padding: 32px;">
+                <div style="font-size: 48px; margin-bottom: 16px;">❌</div>
+                <p style="color: var(--text-secondary);">Error loading leaderboard. Please try again.</p>
+            </div>
+        `;
+    }
 }
 
 function renderLeaderboardList(data) {
@@ -1254,18 +1307,17 @@ function renderLeaderboardList(data) {
     `).join('');
 }
 
-async function switchLeaderboard(type) {
-    const data = await fetchLeaderboard(type);
-    const content = document.getElementById('leaderboard-content');
-    if (content) {
-        content.innerHTML = renderLeaderboardList(data);
-    }
-}
 
-// Fallback if Firebase functions aren't loaded
-if (typeof fetchLeaderboard !== 'function') {
-    window.fetchLeaderboard = async function(type) {
-        console.warn('Firebase not loaded, returning empty leaderboard');
-        return [];
-    };
+async function switchLeaderboard(type) {
+    // Update active tab
+    const tabs = document.querySelectorAll('.leaderboard-tab');
+    tabs.forEach(tab => {
+        if (tab.getAttribute('data-type') === type) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+    
+    await loadLeaderboardData(type);
 }
